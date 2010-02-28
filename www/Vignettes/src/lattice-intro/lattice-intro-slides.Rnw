@@ -123,25 +123,9 @@
   \begin{itemize}
   \item Introduction, simple examples
   \item Overview of features
-  \item Sample session to work through, available at \\
-    ~~~\\
-    ~~~\url{http://dsarkar.fhcrc.org/lattice-lab/} \\
-    ~~~\\
-  \item A few case studies if time permits
   \end{itemize}
 \end{frame}
 
-
-
-
-% \begin{frame}
-%   \frametitle{Further reading}
-%   \begin{itemize}
-%   \item The Lattice book (Springer's UseR! series, March 2008)
-%   \item Handouts (including Chapter 2 of the Lattice book)
-%   \item Online documentation in the \lattice\ package
-%   \end{itemize}
-% \end{frame}
 
 
 
@@ -634,40 +618,25 @@ plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
 
 
 \begin{frame}
+  \frametitle{Further reading}
   \begin{itemize}
   \item The full system would take too long to describe
-  %% \item Handouts cover the important aspects
   \item Online documentation has details; start with \code{?Lattice}
-  \item We discuss a few advanced ideas using some case studies
+  \item More advanced tutorials here
+  \item Lattice book
   \end{itemize}
 \end{frame}
 
 
-
 % \begin{frame}
-%   \frametitle{}
+%   \frametitle{Further reading}
 %   \begin{itemize}
-%   \item 
+%   \item The Lattice book (Springer's UseR! series, March 2008)
+%   \item Handouts (including Chapter 2 of the Lattice book)
+%   \item Online documentation in the \lattice\ package
 %   \end{itemize}
 % \end{frame}
 
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
-
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
 
 
 
@@ -678,48 +647,6 @@ plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
 %   \end{itemize}
 % \end{frame}
 
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
-
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
-
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
-
-
-
-% \begin{frame}
-%   \frametitle{}
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
-% \end{frame}
-
-
-
-
-
-
-\input{tex/main}
 % \appendix
 % \input{appendix}
 \end{document}

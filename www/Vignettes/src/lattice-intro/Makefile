@@ -20,7 +20,7 @@ clean:
 
 %.tex: %.Rnw
 	echo "library(tools); options(continue = '  '); Sweave('$<')" | ${R_PROG} --vanilla --silent
-	rm -f Rplots.ps
+	rm -f Rplots.pdf
 
 %.R: %.Rnw
 	echo "library(tools); Stangle('$<')" | ${R_PROG} --vanilla --silent
