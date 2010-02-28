@@ -1,0 +1,154 @@
+
+\SweaveOpts{prefix.string=figs/reorder}
+\SweaveOpts{eps=FALSE,pdf=TRUE,keep.source=TRUE}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+@ 
+
+
+\begin{frame}
+  \frametitle{Reordering factor levels}
+  \begin{itemize}
+  \item Levels of categorical variables often have no intrinsic order
+  \item The default in \Rfunction{factor} is to use \code{sort(unique(x))}
+    \begin{itemize}
+    \item Implies alphabetical order for factors converted from character
+    \end{itemize}
+  \item Usually irrelevant in analyses
+  \item Can strongly affect impact in a graphical display
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Example}
+  \begin{itemize}
+  \item Population density in US states in 1975 
+  \end{itemize}
+<<>>=  
+state <-
+    data.frame(name = state.name,
+               region = state.region,
+               state.x77)
+state$Density <- with(state, Population / Area)
+dotplot(name ~ Density, state)
+dotplot(name ~ Density, state, 
+        scales = list(x = list(log = TRUE)))
+
+@ 
+\end{frame}
+
+
+<<echo=FALSE>>=
+porig <- dotplot(name ~ Density, state)
+plog <- dotplot(name ~ Density, state, scales = list(x = list(log = TRUE)))
+
+porig2 <- dotplot(reorder(name, Density) ~ Density, state)
+plog2 <- dotplot(reorder(name, Density) ~ Density, state, scales = list(x = list(log = TRUE)))
+
+@ 
+
+
+
+\begin{frame}[plain]
+<<echo=FALSE,fig=TRUE,width=9,height=8>>=
+plot(porig, split = c(1, 1, 2, 1))
+plot(plog, split = c(2, 1, 2, 1), newpage = FALSE)
+@ 
+\end{frame}
+
+
+\begin{frame}[plain]
+<<echo=FALSE,fig=TRUE,width=9,height=8>>=
+plot(porig2, split = c(1, 1, 2, 1))
+plot(plog2, split = c(2, 1, 2, 1), newpage = FALSE)
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{The \Rfunction{reorder} function}
+<<eval=FALSE>>=
+dotplot(reorder(name, Density) ~ Density, state)
+dotplot(reorder(name, Density) ~ Density, state, 
+        scales = list(x = list(log = TRUE)))
+@ 
+  \begin{itemize}
+  \item Reorders levels of a factor by another variable
+  \item optional summary function, default \Rfunction{mean}
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Reordering by multiple variables}
+  \begin{itemize}
+  \item Not directly supported, but\dots
+  \item Order is preserved within ties
+  \end{itemize}
+<<>>=  
+state$region <- with(state, reorder(region, Frost, median))
+state$name <- with(state, 
+                   reorder(reorder(name, Frost), 
+                           as.numeric(region)))
+
+p <- 
+  dotplot(name ~ Frost | region, state, 
+          strip = FALSE, strip.left = TRUE, layout = c(1, 4), 
+          scales = list(y = list(relation = "free", rot = 0)))
+
+plot(p,
+     panel.height = list(x = table(state$region), 
+                         units = "null"))
+
+@ 
+\end{frame}
+
+
+\begin{frame}[plain]
+<<echo=FALSE,fig=TRUE,width=9,height=8>>=
+print(p,
+      position = c(0.1, 0, 0.9, 1),
+      panel.height = list(x = table(state$region), units = "null"))
+@ 
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Ordering panels using \code{index.cond}}
+  \begin{itemize}
+  \item Order panels by some summary of panel data
+  \item Example: death rates due to cancer in US counties, 2001-2003
+  \end{itemize}
+<<>>=  
+data(USCancerRates, package = "latticeExtra")
+xyplot(rate.male ~ rate.female | state, USCancerRates, 
+       index.cond = function(x, y, ...) {
+           median(y - x, na.rm = TRUE)
+       },
+       aspect = "iso",
+       panel = function(...) {
+           panel.grid(h = -1, y = -1)
+           panel.abline(0, 1)
+           panel.xyplot(...)
+       },
+       pch = ".")
+@ 
+\end{frame}
+
+
+\begin{frame}[plain]
+<<echo=FALSE,fig=TRUE,width=12,height=9>>=
+print(trellis.last.object(cex = 3))
+## grid::grid.rect()
+@ 
+\end{frame}
+

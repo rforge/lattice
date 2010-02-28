@@ -1,0 +1,98 @@
+
+
+\SweaveOpts{prefix.string=figs/reglines}
+\SweaveOpts{eps=FALSE,pdf=TRUE,keep.source=TRUE}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+data(Oxboys, package = "nlme")
+@ 
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Back to regression lines}
+  \begin{itemize}
+  \item \code{Oxboys}: model height on age
+    \[
+    \bm{y}_{ij} = \mu + \bm{b}_i + \bm{x}_{ij} + \bm{x}_{ij}^2 + \varepsilon_{ij}
+    \]
+  \item Mixed effect model that can be fit with \code{lme4}
+<<results=hide>>=    
+library(lme4)
+fm.poly <- 
+    lmer(height ~ poly(age, 2) + (1 | Subject), 
+         data = Oxboys)
+@ 
+% <<>>=
+% fm.poly
+% @ 
+
+  \item Goal: plot of data with fitted curve superposed 
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<echo=FALSE>>=  
+xyplot(height + fitted(fm.poly) ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
+       type = c("p", "l"), distribute.type = TRUE,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+xyplot(height ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy",
+       type = "p", pch = 16,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+xyplot(fitted(fm.poly) ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy",
+       type = "l", lwd = 2,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+xyplot(height + fitted(fm.poly) ~ age | Subject,
+       data = Oxboys, strip = FALSE, aspect = "xy", pch = 16,
+       lwd = 2, type = c("p", "l"), distribute.type = TRUE,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+

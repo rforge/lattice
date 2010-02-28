@@ -1,0 +1,726 @@
+\documentclass[compress]{beamer}
+% \documentclass[t,compress]{beamer}
+
+% \usepackage{multimedia}
+
+\mode<presentation>
+{
+  % \usetheme{default}
+  \usetheme[width=0cm]{Hannover}
+  \useoutertheme{split}
+  \setbeamercovered{transparent}
+}
+
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+
+\title{Getting Started with Lattice Graphics}
+
+%\subtitle{Presentation Subtitle}
+\author{Deepayan Sarkar}
+\institute[ISI Delhi] % (optional, but mostly needed)
+{
+  % Computational Biology\\
+  Indian Statistical Institute, Delhi
+}
+\date{\today}
+\subject{Talks} % Can be left out. 
+
+\usepackage{SweaveBeamer}
+\usepackage{alltt}
+% \usepackage{amsbsy}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\setkeys{Gin}{width=\textwidth}
+
+\newcommand{\fixme}[1]{\emph{\small \textbf{#1}}}
+\newcommand{\R}{\textsf{R}}
+\renewcommand{\emph}[1]{\alert{\textit{#1}}}
+\newcommand{\lattice}{\code{lattice}}
+\newcommand{\Rpackage}[1]{\code{#1}}
+\newcommand{\Rfunction}[1]{\code{#1()}}
+\newcommand{\class}[1]{\textit{``#1''}}
+
+
+% \newcommand{\code}[1]{\textsf{#1}}
+% \setbeamercolor{title}{fg=blue!50!black}
+
+
+\SweaveOpts{prefix.string=figs/introslides}
+\SweaveOpts{eps=FALSE,pdf=TRUE,keep.source=TRUE,width=9}
+
+
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction}
+
+
+\begin{frame}
+  \frametitle{\R\ graphics}
+  \begin{itemize}
+  \item \R\ has two largely independent graphics subsystems
+    \begin{itemize}
+    \item Traditional graphics
+      \begin{itemize}
+      \item available in \R\ from the beginning
+      \item rich collection of tools
+      \item not very flexible
+      \end{itemize}
+    \item Grid graphics
+      \begin{itemize}
+      \item relatively recent (2000)
+      \item low-level tool, highly flexible
+      \end{itemize}
+    \end{itemize}
+  \item Grid forms the basis of two high-level graphics systems:
+    \begin{itemize}
+    \item \textsf{lattice}: based on Trellis graphics (Cleveland)
+    \item \textsf{ggplot2}: inspired by \textit{``Grammar of Graphics''}
+      (Wilkinson)
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{The \Rpackage{lattice} package}
+  \begin{itemize}
+  \item Trellis graphics for \R\ (originally developed in \textsf{S})
+  \item Powerful high-level data visualization system
+  \item Provides common statistical graphics with conditioning
+    \begin{itemize}
+    \item emphasis on multivariate data
+    \item sufficient for typical graphics needs
+    \item flexible enough to handle most nonstandard requirements
+    \end{itemize}
+  \item Traditional user interface:
+    \begin{itemize}
+    \item collection of high level functions: \code{xyplot()},
+      \code{dotplot()}, etc.
+    \item interface based on formula and data source
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+
+
+\begin{frame}
+  \frametitle{Outline}
+  \begin{itemize}
+  \item Introduction, simple examples
+  \item Overview of features
+  \item Sample session to work through, available at \\
+    ~~~\\
+    ~~~\url{http://dsarkar.fhcrc.org/lattice-lab/} \\
+    ~~~\\
+  \item A few case studies if time permits
+  \end{itemize}
+\end{frame}
+
+
+
+
+% \begin{frame}
+%   \frametitle{Further reading}
+%   \begin{itemize}
+%   \item The Lattice book (Springer's UseR! series, March 2008)
+%   \item Handouts (including Chapter 2 of the Lattice book)
+%   \item Online documentation in the \lattice\ package
+%   \end{itemize}
+% \end{frame}
+
+
+
+\section{Basic use}
+
+
+\begin{frame}[plain]
+  \frametitle{High-level functions in \lattice}
+\begin{center}
+  \begin{tabular}{ll}
+    \hline
+    \textbf{Function} & \textbf{Default Display} \\
+    \hline
+    \Rfunction{histogram} & Histogram \\
+    \Rfunction{densityplot}~~~~~ & Kernel Density Plot \\
+    \Rfunction{qqmath} & Theoretical Quantile Plot  \\
+    \Rfunction{qq} & Two-sample Quantile Plot \\
+    \Rfunction{stripplot} & Stripchart (Comparative 1-D Scatter Plots) \\
+    \Rfunction{bwplot} & Comparative Box-and-Whisker Plots \\
+    \Rfunction{barchart} & Bar Plot \\
+    \Rfunction{dotplot} & Cleveland Dot Plot \\
+    \Rfunction{xyplot} & Scatter Plot \\
+    \Rfunction{splom} & Scatter-Plot Matrix \\
+    \Rfunction{contourplot} & Contour Plot of Surfaces \\
+    \Rfunction{levelplot} & False Color Level Plot of Surfaces \\
+    \Rfunction{wireframe} & Three-dimensional Perspective Plot of Surfaces  \\
+    \Rfunction{cloud} & Three-dimensional Scatter Plot \\
+    \Rfunction{parallel} & Parallel Coordinates Plot \\
+    \hline
+  \end{tabular}
+\end{center}
+\end{frame}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+@ 
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{The \code{Chem97} dataset}
+  \begin{itemize}
+  \item 1997 A-level Chemistry examination in Britain
+  \end{itemize}
+<<>>=  
+data(Chem97, package = "mlmRev")
+head(Chem97[c("score", "gender", "gcsescore")])
+@ 
+\end{frame}
+
+
+\subsection{Univariate}
+
+
+\begin{frame}[fragile]
+<<>>=  
+histogram(~ gcsescore, data = Chem97)
+@ 
+<<echo=FALSE,fig=TRUE,height=7>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+histogram(~ gcsescore | factor(score), data = Chem97)
+@ 
+<<echo=FALSE,fig=TRUE,height=7>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+densityplot(~ gcsescore | factor(score), Chem97, 
+            plot.points = FALSE, 
+            groups = gender, auto.key = TRUE)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}
+  \frametitle{Trellis Philosophy: Part I}
+  \begin{itemize}
+  \item Display specified in terms of 
+    \begin{itemize}
+    \item Type of display (histogram, densityplot, etc.)
+    \item Variables with specific roles
+    \end{itemize}
+  \item Typical roles for variables
+    \begin{itemize}
+    \item Primary variables: used for the main graphical display
+    \item Conditioning variables: used to divide into subgroups and
+      juxtapose (multipanel conditioning)
+    \item Grouping variable: divide into subgroups and superpose
+    \end{itemize}
+  \item Primary interface: high-level functions
+    \begin{itemize}
+    \item Each function corresponds to a display type
+    \item Specification of roles depends on display type
+      \begin{itemize}
+      \item Usually specified through the formula and the
+        \code{groups} argument
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+qqmath(~ gcsescore | factor(score), Chem97, groups = gender,
+       f.value = ppoints(100), auto.key = TRUE, 
+       type = c("p", "g"), aspect = "xy")
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=  
+qq(gender ~ gcsescore | factor(score), Chem97, 
+   f.value = ppoints(100), type = c("p", "g"), aspect = 1)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=  
+bwplot(factor(score) ~ gcsescore | gender, Chem97)
+@ 
+<<echo=FALSE,fig=TRUE,height=5>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=  
+bwplot(gcsescore ~ gender | factor(score), Chem97, 
+       layout = c(6, 1))
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=  
+stripplot(depth ~ factor(mag), data = quakes,
+          jitter.data = TRUE, alpha = 0.6)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\subsection{Tables}
+
+
+\begin{frame}[fragile]
+  \frametitle{The \code{VADeaths} dataset}
+  \begin{itemize}
+  \item Death rates in Virginia, 1941, among different population subgroups
+  \end{itemize}
+<<>>=  
+VADeaths
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+barchart(VADeaths, groups = FALSE, layout = c(4, 1))
+@ 
+<<echo=FALSE,fig=TRUE,height=4>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=  
+dotplot(VADeaths, groups = FALSE, layout = c(4, 1))
+@ 
+<<echo=FALSE,fig=TRUE,height=4>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+dotplot(VADeaths, type = "o",
+        auto.key = list(points = TRUE, lines = TRUE, 
+                        space = "right"))
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\subsection{Scatter plots}
+
+
+\begin{frame}[fragile]
+<<>>=  
+data(Earthquake, package = "nlme")
+xyplot(accel ~ distance, data = Earthquake)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+xyplot(accel ~ distance, data = Earthquake, 
+       scales = list(log = TRUE), 
+       type = c("p", "g", "smooth"))
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\subsection{Shingles}
+
+
+\begin{frame}[fragile]
+<<>>=  
+Depth <- equal.count(quakes$depth, number=8, overlap=.1)
+summary(Depth)
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+xyplot(lat ~ long | Depth, data = quakes)
+@ 
+<<echo=FALSE,fig=TRUE,height=7>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+cloud(depth ~ lat * long, data = quakes,
+      zlim = rev(range(quakes$depth)),
+      screen = list(z = 105, x = -70), panel.aspect = 0.75)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+<<>>=  
+cloud(depth ~ lat * long, data = quakes,
+      zlim = rev(range(quakes$depth)),
+      screen = list(z = 80, x = -70), panel.aspect = 0.75)
+@ 
+<<echo=FALSE,fig=TRUE,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{More high-level functions}
+  \begin{itemize}
+  \item More high-level functions in \lattice
+    \begin{itemize}
+    \item Won't discuss, but examples in manual page
+    \end{itemize}
+  \item Other Trellis high-level functions can be defined in other
+    packages, e.g.,
+    \begin{itemize}
+    \item \Rfunction{ecdfplot}, \Rfunction{mapplot} in the
+      \code{latticeExtra} package
+    \item \Rfunction{hexbinplot} in the \code{hexbin} package
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\subsection{Object}
+
+
+
+\begin{frame}
+  \frametitle{The \class{trellis} object model}
+  \begin{itemize}
+  \item One important feature of \lattice:
+    \begin{itemize}
+    \item High-level functions do not actually plot anything
+    \item They return an object of class \class{trellis}
+    \item Display created when such objects are \Rfunction{print}-ed
+      or \Rfunction{plot}-ed
+    \end{itemize}
+  \item Usually not noticed because of automatic printing rule
+  \item Can be used to arrange multiple plots
+  \item Other uses as well
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+<<eval=FALSE>>=  
+dp.uspe <-
+    dotplot(t(USPersonalExpenditure), 
+            groups = FALSE, layout = c(1, 5),
+            xlab = "Expenditure (billion dollars)")
+dp.uspe.log <-
+    dotplot(t(USPersonalExpenditure), 
+            groups = FALSE, layout = c(1, 5),
+            scales = list(x = list(log = 2)),
+            xlab = "Expenditure (billion dollars)")
+plot(dp.uspe,     split = c(1, 1, 2, 1))
+plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+<<echo=FALSE,fig=TRUE,height=7>>=
+dp.uspe <-
+    dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
+            xlab = "Expenditure (billion dollars)")
+dp.uspe.log <-
+    dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
+            scales = list(x = list(log = 2)),
+            xlab = "Expenditure (billion dollars)")
+plot(dp.uspe,     split = c(1, 1, 2, 1))
+plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
+@ 
+\end{frame}
+
+
+
+
+
+% \begin{frame}[fragile]
+% <<>>=  
+
+% @ 
+% <<echo=FALSE,fig=TRUE,height=7>>=
+% plot(trellis.last.object())
+% @ 
+% \end{frame}
+
+
+
+
+
+
+
+\section{Overview}
+
+
+
+\begin{frame}
+  \frametitle{Trellis Philosophy: Part I}
+  \begin{itemize}
+  \item Display specified in terms of 
+    \begin{itemize}
+    \item Type of display (histogram, densityplot, etc.)
+    \item Variables with specific roles
+    \end{itemize}
+  \item Typical roles for variables
+    \begin{itemize}
+    \item Primary variables: used for the main graphical display
+    \item Conditioning variables: used to divide into subgroups and
+      juxtapose (multipanel conditioning)
+    \item Grouping variable: divide into subgroups and superpose
+    \end{itemize}
+  \item Primary interface: high-level functions
+    \begin{itemize}
+    \item Each function corresponds to a display type
+    \item Specification of roles depends on display type
+      \begin{itemize}
+      \item Usually specified through the formula and the
+        \code{groups} argument
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Trellis Philosophy: Part II}
+  \begin{itemize}
+  \item Design goals:
+    \begin{itemize}
+    \item Enable effective graphics by encouraging good graphical
+      practice (e.g., Cleveland, 1985)
+    \item Remove the burden from the user as much as possible by
+      building in good defaults into software
+    \end{itemize}
+  \item Some obvious examples:
+    \begin{itemize}
+    \item Use as much of the available space as possible
+    \item Encourage direct comparsion by superposition (grouping)
+    \item Enable comparison when juxtaposing (conditioning): 
+      \begin{itemize}
+      \item use common axes
+      \item add common reference objects (such as grids)
+      \end{itemize}
+    \end{itemize}
+  \item Inevitable departure from traditional \R\ graphics paradigms
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Trellis Philosophy: Part III}
+  \begin{itemize}
+  \item Any serious graphics system must also be flexible
+  \item \lattice\ tries to balance flexibility and ease of use using
+    the following model:
+    \begin{itemize}
+    \item A display is made up of various elements
+    \item Coordinated defaults provide meaningful results, but
+    \item Each element can be controlled independently
+    \item The main elements are:
+      \begin{itemize}
+      \item the primary (panel) display
+      \item axis annotation
+      \item strip annotation (describing the conditioning process)
+      \item legends (typically describing the grouping process)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \begin{itemize}
+  \item The full system would take too long to describe
+  %% \item Handouts cover the important aspects
+  \item Online documentation has details; start with \code{?Lattice}
+  \item We discuss a few advanced ideas using some case studies
+  \end{itemize}
+\end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+% \end{frame}
+
+
+
+
+
+
+\input{tex/main}
+% \appendix
+% \input{appendix}
+\end{document}
+

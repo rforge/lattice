@@ -1,0 +1,230 @@
+
+
+\SweaveOpts{prefix.string=figs/panels}
+\SweaveOpts{eps=FALSE,pdf=TRUE,keep.source=TRUE}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+@ 
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Example 1: Growth curves}
+  \begin{itemize}
+  \item Heights of boys from Oxford over time
+  \item 26 boys, height measured on 9 occasions
+<<>>=  
+data(Oxboys, package = "nlme")
+head(Oxboys)
+@ 
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+xyplot(height ~ age | Subject, data = Oxboys, 
+       strip = FALSE, aspect = "xy", pch = 16,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Example 2: Exam scores}
+  \begin{itemize}
+  \item GCSE exam scores on a science subject. Two components:
+    \begin{itemize}
+    \item course work
+    \item written paper
+    \end{itemize}
+  \item 1905 students
+<<>>=  
+data(Gcsemv, package = "mlmRev")
+head(Gcsemv)
+@ 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Adding to a Lattice display}
+  \begin{itemize}
+  \item Traditional \R\ graphics encourages incremental additions
+  \item The Lattice analogue is to write panel functions
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{A simple panel function}
+  \begin{itemize}
+  \item Things to know:
+    \begin{itemize}
+    \item Panel functions are functions (!)
+    \item They are responsible for graphical content inside panels
+    \item They get executed once for every panel
+    \item Every high level function has a default panel function\\
+      e.g., \Rfunction{xyplot} has default panel function
+      \Rfunction{panel.xyplot}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[t,fragile]
+  \frametitle{A simple panel function}
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = panel.xyplot)
+@ 
+  \end{itemize}
+\end{frame}
+
+
+
+
+
+
+\begin{frame}[t,fragile]
+  \frametitle{A simple panel function}
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(...) {
+           panel.xyplot(...)
+       })
+@ 
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[t,fragile]
+  \frametitle{A simple panel function}
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+       })
+@ 
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[t,fragile]
+  \frametitle{A simple panel function}
+  \begin{itemize}
+  \item Now, we can add a couple of elements:
+<<>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(x, y, ...) {
+           panel.grid(h = -1, v = -1)
+           panel.xyplot(x, y, ...)
+           panel.loess(x, y, ..., col = "black")
+           panel.rug(x = x[is.na(y)], 
+                     y = y[is.na(x)])
+       })
+@ 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+  % \frametitle{}
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Panel functions}
+  Another useful feature: argument passing
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, 
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ..., 
+                        type = c("g", "p", "smooth"),
+                        col.line = "black")
+       })
+@ 
+is equivalent to 
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, 
+       type = c("g", "p", "smooth"), col.line = "black")
+@ 
+\end{frame}
+
+
+\begin{frame}[plain]
+  % \frametitle{}
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Passing arguments to panel functions}
+  \begin{itemize}
+  \item Requires knowledge of arguments supported by panel function
+  \item Each high-level function has a corresponding \textit{default}
+    panel function, named as ``\code{panel.}'' followed by the
+    function name.  For example,
+    \begin{itemize}
+    \item \Rfunction{histogram} has panel function \code{panel.histogram}
+    \item \Rfunction{dotplot} has panel function \code{panel.dotplot}
+    \end{itemize}
+  \item Most have useful arguments that support common variants
+  \end{itemize}
+\end{frame}
+
+
+

@@ -1,0 +1,186 @@
+
+
+\SweaveOpts{prefix.string=figs/regGcsemv}
+\SweaveOpts{eps=FALSE,pdf=TRUE,keep.source=TRUE}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+data(Gcsemv, package = "mlmRev")
+@ 
+
+
+
+\begin{frame}
+  \frametitle{GCSE exam scores}
+  \begin{itemize}
+  \item \code{Gcsemv}: model written score by coursework and gender
+  \item A similar approach does not work as well
+    \begin{itemize}
+    \item $x$ values are not ordered
+    \item missing values are omitted from fitted model
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  % \frametitle{}
+<<>>=  
+fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
+xyplot(written + fitted(fm) ~ course | gender, 
+       data = subset(Gcsemv, !(is.na(written) | is.na(course))),
+       type = c("p", "l"), distribute.type = TRUE)
+
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+\begin{frame}[plain,fragile]
+  %\frametitle{GCSE exam scores}
+  \begin{itemize}
+  \item Built-in solution: Simple Linear Regression in each panel
+  \end{itemize}
+<<>>=  
+xyplot(written ~ course | gender, Gcsemv, 
+       type = c("p", "r"), col.line = "black")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{GCSE exam scores}
+  \begin{itemize}
+  \item More complex models need a little more work
+  \item Consider three models:
+<<>>=
+fm0 <- lm(written ~ course, Gcsemv)
+fm1 <- lm(written ~ course + gender, Gcsemv)
+fm2 <- lm(written ~ course * gender, Gcsemv)
+@
+  \item Goal: compare \code{fm2} and \code{fm1} with \code{fm0}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+<<echo=FALSE>>=
+
+grid <-
+    expand.grid(course = do.breaks(range(Gcsemv$course, finite = TRUE), 30),
+                gender = unique(Gcsemv$gender))
+
+fm0.pred <- cbind(grid, written = predict(fm0, newdata = grid))
+fm1.pred <- cbind(grid, written = predict(fm1, newdata = grid))
+fm2.pred <- cbind(grid, written = predict(fm2, newdata = grid))
+
+orig <- Gcsemv[c("course", "gender", "written")]
+
+combined <-
+    make.groups(original = orig, 
+                fm0 = fm0.pred,
+                fm2 = fm2.pred)
+
+xyplot(written ~ course | gender, combined, groups = which,
+       type = c("p", "l", "l"), distribute.type = TRUE)
+
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  %% \frametitle{One Approach}
+  \begin{itemize}
+  \item Solution: evaluate fits separately and combine
+  %% \item Generalizes to more models, other types of models
+<<>>=
+
+course.rng <- range(Gcsemv$course, finite = TRUE)
+grid <-
+    expand.grid(course = do.breaks(course.rng, 30),
+                gender = unique(Gcsemv$gender))
+
+fm0.pred <- 
+    cbind(grid, 
+          written = predict(fm0, newdata = grid))
+fm1.pred <- 
+    cbind(grid, 
+          written = predict(fm1, newdata = grid))
+fm2.pred <- 
+    cbind(grid, 
+          written = predict(fm2, newdata = grid))
+
+orig <- Gcsemv[c("course", "gender", "written")]
+@
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+<<>>=
+
+str(orig)
+str(fm0.pred)
+
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  % \frametitle{Approach: evaluate fits separately and combine}
+<<>>=
+
+combined <-
+    make.groups(original = orig, 
+                fm0 = fm0.pred,
+                fm2 = fm2.pred)
+
+str(combined)
+
+@
+\end{frame}
+
+
+
+
+\begin{frame}[plain, fragile]
+<<>>=
+xyplot(written ~ course | gender, 
+       data = combined, groups = which,
+       type = c("p", "l", "l"), distribute.type = TRUE)
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+\end{frame}
+
+
+
+
+% \begin{frame}
+%   \frametitle{}
+%   \begin{itemize}
+%   \item Generalizes to
+%     \begin{itemize}
+%     \item More than two fitted models
+%     \item Non-linear models
+%     \end{itemize}
+%   \end{itemize}
+% \end{frame}
+
+

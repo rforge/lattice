@@ -1,0 +1,117 @@
+\documentclass[10pt]{article}
+
+
+\title{Getting more out of lattice: tips for the power useR}
+\author{Deepayan Sarkar}
+\date{\today}
+
+
+\usepackage[text={6.5in,8.5in},centering]{geometry}
+\usepackage{Sweave}
+\usepackage[round]{natbib}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\setkeys{Gin}{width=0.98\textwidth}
+
+\newcommand{\fixme}[1]{\emph{\small \textbf{#1}}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\lattice}{\code{lattice}}
+\newcommand{\Rpackage}[1]{\code{#1}}
+\newcommand{\Rfunction}[1]{\code{#1()}}
+\newcommand{\class}[1]{\textit{``#1''}}
+
+
+\newcommand{\dontshow}[1]{}
+
+\newtheorem{exercise}{Exercise}
+\newenvironment{solution}{}{}
+
+
+\begin{document}
+\maketitle
+
+\raggedright
+
+
+\SweaveOpts{keep.source=TRUE,pdf=TRUE,eps=FALSE,width=9,prefix.string=figs/lab}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+lattice.options(default.theme = standard.theme(color = FALSE),
+                panel.error = stop)
+options(width = 70, 
+        str = list(strict.width = 'cut', 
+                   digits.d = 3, vec.len = 3), 
+        continue = '  ')
+@ 
+
+
+
+\lattice\ is an add-on package that implements Trellis graphics
+(originally developed for \textsf{S} and \textsf{S-PLUS}) in \R.  It
+is a powerful and elegant high-level data visualization system, with
+an emphasis on multivariate data, that is sufficient for typical
+graphics needs, and is also flexible enough to handle most nonstandard
+requirements.  This lab describes some intermediate uses of lattice.
+
+
+\paragraph{Case studies}
+\begin{itemize}
+\item Adding regression lines to scatter plots
+\item Reordering levels of a factor
+\end{itemize}
+
+
+
+\subsection{Regression Lines}
+
+
+% \input{panelFunctions}
+% \input{regOxboys}
+% \input{regGcsemv}
+
+
+\subsection{Reordering}
+
+% \input{reorder}
+
+
+\subsection{Summary}
+
+
+\paragraph{Take home message}
+\begin{itemize}
+\item Panel functions provide finest level of control
+\item Built-in panel functions are also powerful
+  \begin{itemize}
+  \item Easily taken advantage of using argument passing
+  \item Requires knowledge of arguments (read documentation!)
+  \item Special function \Rfunction{panel.superpose} useful for
+    grouping
+  \end{itemize}
+\item Several useful functions make life a little simpler
+  \begin{itemize}
+  \item \Rfunction{reorder}, \Rfunction{make.groups}, etc.
+  \end{itemize}
+\end{itemize}
+
+
+
+
+\subsection*{Session information}
+
+<<echo=FALSE,results=tex>>=
+toLatex(sessionInfo())
+@ 
+
+
+
+\bibliography{references}
+\bibliographystyle{abbrvnat}
+
+
+\end{document}

@@ -1,0 +1,111 @@
+\documentclass[compress]{beamer}
+% \documentclass[t,compress]{beamer}
+
+% \usepackage{multimedia}
+
+\mode<presentation>
+{
+  % \usetheme{default}
+  \usetheme[width=0cm]{Hannover}
+  \useoutertheme{split}
+  \setbeamercovered{transparent}
+}
+
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+
+\title{Getting more out of lattice}
+\subtitle{Some tips for the power useR}
+
+\author{Deepayan Sarkar}
+\institute[ISI Delhi] % (optional, but mostly needed)
+{
+  % Computational Biology\\
+  Indian Statistical Institute, Delhi
+}
+\date{\today}
+\subject{Talks} % Can be left out. 
+
+\usepackage{SweaveBeamer}
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\setkeys{Gin}{width=\textwidth}
+
+\newcommand{\fixme}[1]{\emph{\small \textbf{#1}}}
+\newcommand{\R}{\textsf{R}}
+\renewcommand{\emph}[1]{\alert{\textit{#1}}}
+
+
+\newcommand{\lattice}{\code{lattice}}
+\newcommand{\Rpackage}[1]{\code{#1}}
+\newcommand{\Rfunction}[1]{\code{#1()}}
+\newcommand{\class}[1]{\textit{``#1''}}
+
+
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+
+\section{Case studies}
+
+
+
+\begin{frame}
+  \frametitle{Case studies}
+  \begin{itemize}
+  \item Adding regression lines to scatter plots
+  \item Reordering levels of a factor
+  \end{itemize}
+\end{frame}
+
+
+
+\subsection{Regression Lines}
+
+
+\input{panelFunctions}
+\input{regOxboys}
+\input{regGcsemv}
+
+
+\subsection{Reordering}
+
+\input{reorder}
+
+
+\subsection{Summary}
+
+
+\begin{frame}
+  \frametitle{Take home message}
+  \begin{itemize}
+  \item Panel functions provide finest level of control
+  \item Built-in panel functions are also powerful
+    \begin{itemize}
+    \item Easily taken advantage of using argument passing
+    \item Requires knowledge of arguments (read documentation!)
+    \item Special function \Rfunction{panel.superpose} useful for
+      grouping
+    \end{itemize}
+  \item Several useful functions make life a little simpler
+    \begin{itemize}
+    \item \Rfunction{reorder}, \Rfunction{make.groups}, etc.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\end{document}

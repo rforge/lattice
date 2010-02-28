@@ -1,0 +1,55 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{Sweave}{}
+
+\RequirePackage{ifthen}
+\newboolean{Sweave@gin}
+\setboolean{Sweave@gin}{true}
+\newboolean{Sweave@ae}
+\setboolean{Sweave@ae}{true}
+
+\DeclareOption{nogin}{\setboolean{Sweave@gin}{false}}
+\DeclareOption{noae}{\setboolean{Sweave@ae}{false}}
+\ProcessOptions
+
+\RequirePackage{graphicx,fancyvrb}
+%% \IfFileExists{upquote.sty}{\RequirePackage{upquote}}{}
+
+\ifthenelse{\boolean{Sweave@gin}}{\setkeys{Gin}{width=0.8\textwidth}}{}%
+\ifthenelse{\boolean{Sweave@ae}}{%
+  \RequirePackage[T1]{fontenc}  
+  \RequirePackage{ae}
+}{}%
+
+% original
+% \DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
+% \DefineVerbatimEnvironment{Soutput}{Verbatim}{}
+% \DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl}
+
+
+
+\RequirePackage{framed}
+
+\RequirePackage{color}
+%%\definecolor{bgcolor}{rgb}{0.6,0.6,0.6} 
+\definecolor{shadecolor}{gray}{0.9} 
+
+%\newcommand\bgcolbox[1]{\colorbox{bgcolor}{\makebox[0.98\textwidth]{#1}}}
+%\newcommand\bgcolbox[1]{\colorbox{bgcolor}{#1}}
+% \renewcommand\FancyVerbFormatLine[1]{\bgcolbox{#1}}
+
+\fvset{listparameters={\setlength{\topsep}{0pt}}}
+
+%% old experiments
+% \DefineVerbatimEnvironment{Sinput}{Verbatim}{
+%   fontshape=sl,gobble=0,frame=none,%single,
+%   %formatcom=\setbgcolbox,
+%   rulecolor=\color{bgcolor}}
+
+
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl,gobble=0}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontsize=\small,fontshape=sl}
+
+\newenvironment{Schunk}{\topsep=0ex\relax\vspace{6pt}\small}{\vspace{6pt}}
+\renewenvironment{Schunk}{\begin{shaded}}{\end{shaded}}
+
