@@ -11,12 +11,12 @@ RNW_DEPS = panelFunctions regGcsemv regOxboys reorder
 
 all: lattice-tricks.pdf lattice-tricks-slides.pdf
 
-lattice-tricks-slides.tex: $(RNW_DEPS:=.tex) Sweave.sty
+lattice-tricks-slides.tex: $(RNW_DEPS:=.tex)
 	${R_PROG} CMD Sweave lattice-tricks-slides.Rnw
-	rm -f Rplots.ps
+	rm -f Rplots.pdf
 
 clean:
-	rm -f *.log *.dvi *.ps *.pdf *.R figs/* *~ */*~
+	rm -f *.log *.dvi *.ps *.toc *.nav *.out *.vrb *.aux *.snm *.R figs/* *~ */*~
 
 %.tex: %.Rnw
 	echo "library(tools); options(continue = '  '); Sweave('$<')" | ${R_PROG} --vanilla --silent

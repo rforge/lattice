@@ -16,7 +16,7 @@ all: lattice-intro.pdf lattice-intro-slides.pdf
 #latticeTips-handout-6.pdf
 
 clean:
-	rm -f *.log *.dvi *.ps *.pdf *.R figs/* *~ */*~
+	rm -f *.log *.dvi *.ps *.toc *.nav *.out *.vrb *.aux *.snm *.R figs/* *~ */*~
 
 %.tex: %.Rnw
 	echo "library(tools); options(continue = '  '); Sweave('$<')" | ${R_PROG} --vanilla --silent
