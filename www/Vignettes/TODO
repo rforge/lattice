@@ -4,3 +4,18 @@ Lattice tips for the power useR (UseR! 2007? talk) - decouple from intro
 Drawing confidence bands with lattice
 More grouped displays with lattice - bwplot, histogram
 
+
+S-PLUS compatibility: [these are sections deleted from the main docs, and should eventually be included in a vignette]
+
+  Most high level Trellis functions in S-PLUS are
+  implemented, with the exception of \code{piechart}.
+
+  The public interface is based on the
+  implementation in S-PLUS, but features several extensions, in addition
+  to incompatibilities introduced through the use of \code{grid}.  To
+  the extent possible, care has been taken to ensure that existing
+  Trellis code written for S-PLUS works unchanged (or with minimal
+  change) in Lattice. If you are having problems porting S-PLUS code,
+  read the entry for \code{panel} in the documentation for
+  \code{\link{xyplot}}. 
+
