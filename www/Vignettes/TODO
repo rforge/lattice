@@ -5,6 +5,8 @@ Drawing confidence bands with lattice
 More grouped displays with lattice - bwplot, histogram
 
 
+
+
 S-PLUS compatibility: [these are sections deleted from the main docs, and should eventually be included in a vignette]
 
   Most high level Trellis functions in S-PLUS are
@@ -19,3 +21,6 @@ S-PLUS compatibility: [these are sections deleted from the main docs, and should
   read the entry for \code{panel} in the documentation for
   \code{\link{xyplot}}. 
 
+  To the extent
+  possible, care has been taken to ensure that Trellis code written for
+  S works unchanged (or with minimal changes) in Lattice.
