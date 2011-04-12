@@ -4,6 +4,14 @@ Lattice tips for the power useR (UseR! 2007? talk) - decouple from intro
 Drawing confidence bands with lattice
 More grouped displays with lattice - bwplot, histogram
 
+How to do multiple grouping in lattice: 
+
+  Easy in ggplot2.  One variable for color, other for line type.  To do 
+  this in lattice, one option is to have interaction groups etc. (in book?).
+  Other option is to map variables to vector col, pch., etc. using a simple
+  function (along with with() to get non-standard-like evaluation).  Legend
+  can be done with combine.legends() type function in latticeExtra (needs work?). 
+
 
 
 
