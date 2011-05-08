@@ -36,19 +36,10 @@
 \raggedright
 
 
-\SweaveOpts{prefix.string=figs/intro}
-\SweaveOpts{keep.source=TRUE,pdf=TRUE,eps=FALSE,width=9}
 
 
-<<echo=FALSE,results=hide>>=
-library(lattice)
-lattice.options(default.theme = standard.theme(color = FALSE),
-                panel.error = stop)
-options(width = 70, 
-        str = list(strict.width = 'cut', 
-                   digits.d = 3, vec.len = 3), 
-        continue = '  ')
-@ 
+
+
 
 
 
@@ -66,10 +57,21 @@ pointers to further resources.
 
 To fix ideas, we start with a few simple examples. We use the
 \code{Chem97} dataset from the \Rpackage{mlmRev} package.
-<<>>=
-data(Chem97, package = "mlmRev")
-head(Chem97)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> data(Chem97, package = "mlmRev")
+> head(Chem97)
+\end{Sinput}
+\begin{Soutput}
+  lea school student score gender age gcsescore   gcsecnt
+1   1      1       1     4      F   3     6.625 0.3393157
+2   1      1       2    10      F  -3     7.625 1.3393157
+3   1      1       3    10      F  -4     7.250 0.9643157
+4   1      1       4    10      F  -2     7.500 1.2143157
+5   1      1       5     8      F  -1     6.444 0.1583157
+6   1      1       6    10      F   4     7.750 1.4643157
+\end{Soutput}
+\end{Schunk}
 %
 The dataset records information on students appearing in the 1997
 A-level chemistry examination in Britain.  We are only interested in
@@ -87,28 +89,28 @@ the following variables:
 
 Using \lattice, we can draw a histogram of all the \code{gcsescore}
 values using
-<<>>=
-histogram(~ gcsescore, data = Chem97)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> histogram(~ gcsescore, data = Chem97)
+\end{Sinput}
+\end{Schunk}
 %
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-004}
 \end{center}
 This plot shows a reasonably symmetric unimodal distribution, but is
 otherwise uninteresting.  A more interesting display would be one
 where the distribution of \code{gcsescore} is \emph{compared} across
 different subgroups, say those defined by the A-level exam score.
 This can be done using
-<<>>=
-histogram(~ gcsescore | factor(score), data = Chem97)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> histogram(~ gcsescore | factor(score), data = Chem97)
+\end{Sinput}
+\end{Schunk}
 %
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=5>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-006}
 \end{center}
 
 
@@ -120,15 +122,15 @@ density estimates.  In the following example, we use the same
 subgroups as before in the different panels, but additionally
 subdivide the \code{gcsescore} values by \code{gender} within each
 panel.
-<<>>=
-densityplot(~ gcsescore | factor(score), Chem97, groups = gender,
-            plot.points = FALSE, auto.key = TRUE)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> densityplot(~ gcsescore | factor(score), Chem97, groups = gender,
+              plot.points = FALSE, auto.key = TRUE)
+\end{Sinput}
+\end{Schunk}
 %
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=6>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-008}
 \end{center}
 
 \begin{exercise}
@@ -299,15 +301,15 @@ probability density function.  Another useful display is the normal
 Q-Q plot, which is related to the distribution function $F(x) = P(X
 \leq x)$.  Normal Q-Q plots can be produced by the \lattice\ function
 \Rfunction{qqmath}.
-<<>>=
-qqmath(~ gcsescore | factor(score), Chem97, groups = gender,
-       f.value = ppoints(100), auto.key = TRUE, 
-       type = c("p", "g"), aspect = "xy")
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> qqmath(~ gcsescore | factor(score), Chem97, groups = gender,
+         f.value = ppoints(100), auto.key = TRUE, 
+         type = c("p", "g"), aspect = "xy")
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=6>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-010}
 \end{center}
 Normal Q-Q plots plot empirical quantiles of the data against
 quantiles of the normal distribution (or some other theoretical
@@ -336,14 +338,14 @@ factor with two levels, and the samples compared are the subsets of
 \code{x} for the two levels of \code{y}.  For example, we can compare
 the distributions of \code{gcsescore} for males and females,
 conditioning on A-level score, with
-<<>>=
-qq(gender ~ gcsescore | factor(score), Chem97, 
-   f.value = ppoints(100), type = c("p", "g"), aspect = 1)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> qq(gender ~ gcsescore | factor(score), Chem97, 
+     f.value = ppoints(100), type = c("p", "g"), aspect = 1)
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=6>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-012}
 \end{center}
 The plot suggests that females do better than males in the GCSE exam
 for a given A-level score (in other words, males tend to improve more
@@ -368,13 +370,13 @@ extremes.  See \code{?boxplot.stats} for details.
 
 ~~~~Box-and-whisker plots can be produced by the \lattice\ function
 \Rfunction{bwplot}.  
-<<>>=
-bwplot(factor(score) ~ gcsescore | gender, Chem97)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> bwplot(factor(score) ~ gcsescore | gender, Chem97)
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=5>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-014}
 \end{center}
 The decreasing lengths of the boxes and whiskers suggest decreasing
 variance, and the large number of outliers on one side indicate
@@ -390,13 +392,13 @@ The same box-and-whisker plots can be displayed in a slightly
 different layout to emphasize a more subtle effect in the data: for
 example, the median \code{gcsescore} does not uniformly increase from
 left to right in the following plot, as one might have expected.
-<<>>=
-bwplot(gcsescore ~ gender | factor(score), Chem97, layout = c(6, 1))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> bwplot(gcsescore ~ gender | factor(score), Chem97, layout = c(6, 1))
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=6>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-016}
 \end{center}
 The \code{layout} argument controls the layout of panels in columns,
 rows, and pages (the default would not have been as useful in this
@@ -420,10 +422,12 @@ because of a switch in the order of variables in the formula.
   and to a lesser extent Q-Q plots, are mostly useful when the
   distributions are symmetric and unimodal, and can be misleading
   otherwise.  For example, consider the display produced by
-<<>>=
-data(gvhd10, package = "latticeExtra")
-bwplot(Days ~ log(FSC.H), data = gvhd10)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> data(gvhd10, package = "latticeExtra")
+> bwplot(Days ~ log(FSC.H), data = gvhd10)
+\end{Sinput}
+\end{Schunk}
   %
   What would you conclude about the distribution of \code{log(FSC.H)} 
   from this plot? Now draw kernel density plots of \code{log(FSC.H)}
@@ -439,17 +443,17 @@ For small samples, summarizing is often unnecessary, and simply
 plotting all the data reveals interesting features of the
 distribution.  The following example, which uses the \code{quakes}
 dataset, plots depths of earthquake epicenters by magnitude.
-<<>>=
-stripplot(depth ~ factor(mag), data = quakes,
-          jitter.data = TRUE, alpha = 0.6, 
-          main = "Depth of earthquake epicenters by magnitude",
-          xlab = "Magnitude (Richter)",
-          ylab = "Depth (km)")
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> stripplot(depth ~ factor(mag), data = quakes,
+            jitter.data = TRUE, alpha = 0.6, 
+            main = "Depth of earthquake epicenters by magnitude",
+            xlab = "Magnitude (Richter)",
+            ylab = "Depth (km)")
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=7>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-019}
 \end{center}
 This is known as a strip plot of a 1-D scatter plot.  Note the use of
 jittering and partial transparency to alleviate potential
@@ -472,16 +476,51 @@ dot plots.\footnote{Pie charts are also popular, but they have serious
 we use the \code{VADeaths} dataset, which gives death rates in the
 U.S. state of Virginia in 1941 among different population subgroups.
 \code{VADeaths} is a matrix.
-<<>>=
-VADeaths
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> VADeaths
+\end{Sinput}
+\begin{Soutput}
+      Rural Male Rural Female Urban Male Urban Female
+50-54       11.7          8.7       15.4          8.4
+55-59       18.1         11.7       24.3         13.6
+60-64       26.9         20.3       37.0         19.3
+65-69       41.0         30.9       54.6         35.1
+70-74       66.0         54.3       71.1         50.0
+\end{Soutput}
+\end{Schunk}
 %
 To use the \lattice\ formula interface, we first need to convert it
 into a data frame.
-<<>>=
-VADeathsDF <- as.data.frame.table(VADeaths, responseName = "Rate")
-VADeathsDF
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> VADeathsDF <- as.data.frame.table(VADeaths, responseName = "Rate")
+> VADeathsDF
+\end{Sinput}
+\begin{Soutput}
+    Var1         Var2 Rate
+1  50-54   Rural Male 11.7
+2  55-59   Rural Male 18.1
+3  60-64   Rural Male 26.9
+4  65-69   Rural Male 41.0
+5  70-74   Rural Male 66.0
+6  50-54 Rural Female  8.7
+7  55-59 Rural Female 11.7
+8  60-64 Rural Female 20.3
+9  65-69 Rural Female 30.9
+10 70-74 Rural Female 54.3
+11 50-54   Urban Male 15.4
+12 55-59   Urban Male 24.3
+13 60-64   Urban Male 37.0
+14 65-69   Urban Male 54.6
+15 70-74   Urban Male 71.1
+16 50-54 Urban Female  8.4
+17 55-59 Urban Female 13.6
+18 60-64 Urban Female 19.3
+19 65-69 Urban Female 35.1
+20 70-74 Urban Female 50.0
+\end{Soutput}
+\end{Schunk}
 %
 Bar charts are produced by the \Rfunction{barchart} function, and
 Cleveland dot plots by \Rfunction{dotplot}.  Both allow a formula of
@@ -492,25 +531,25 @@ variables), where one of \code{x} and \code{y} should be a factor.
 
 
 A bar chart of the \code{VADeathsDF} data is produced by
-<<>>=
-barchart(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> barchart(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1))
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-023}
 \end{center}
 This plot is potentially misleading, because a strong visual effect in
 the plot is the comparison of the areas of the shaded bars, which do
 not mean anything.  This problem can be addressed by making the areas
 proportional to the values they encode.
-<<>>=
-barchart(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1), origin = 0)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> barchart(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1), origin = 0)
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-025}
 \end{center}
 
 \newpage
@@ -518,25 +557,25 @@ plot(trellis.last.object())
 A better design is to altogether forego the bars, which distract from
 the primary comparison of the endpoint positions, and instead use a
 dot plot.
-<<>>=
-dotplot(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> dotplot(Var1 ~ Rate | Var2, VADeathsDF, layout = c(4, 1))
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=3.5>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-027}
 \end{center}
 In this particular example, the display is more effective if we use
 \code{Var2} as a grouping variable, and join the points within each
 group.  
-<<>>=
-dotplot(Var1 ~ Rate, data = VADeathsDF, groups = Var2, type = "o", 
-        auto.key = list(space = "right", points = TRUE, lines = TRUE))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> dotplot(Var1 ~ Rate, data = VADeathsDF, groups = Var2, type = "o", 
+          auto.key = list(space = "right", points = TRUE, lines = TRUE))
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4.5>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-029}
 \end{center}
 This plot clearly shows that the pattern of death rate by age is
 virtually identical for urban and rural females, with an increased
@@ -557,22 +596,30 @@ and \Rfunction{dotplot} are frequently used for multiway tables stored
 as arrays, \lattice\ also includes suitable methods that bypass the
 conversion to a data frame that would be required otherwise.  For
 example, an alternative to the last example is
-<<>>=
-dotplot(VADeaths, type = "o",
-        auto.key = list(points = TRUE, lines = TRUE, space = "right"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> dotplot(VADeaths, type = "o",
+          auto.key = list(points = TRUE, lines = TRUE, space = "right"))
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=5>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-031}
 \end{center}
 Methods available for a particular generic can be listed
 using\footnote{This is only true for \textsf{S3} generics and methods.
   \lattice\ can be extended to use the \textsf{S4} system as well,
   although we will not discuss such extensions here.  }
-<<>>=
-methods(generic.function = "dotplot")
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> methods(generic.function = "dotplot")
+\end{Sinput}
+\begin{Soutput}
+[1] dotplot.array*   dotplot.default* dotplot.formula*
+[4] dotplot.matrix*  dotplot.numeric* dotplot.table*  
+
+   Non-visible functions are asterisked
+\end{Soutput}
+\end{Schunk}
 %
 The special features of the methods, if any, are described in their
 respective help pages; for example, \code{?dotplot.matrix} for the
@@ -592,27 +639,27 @@ contains measurements recorded at various seismometer locations for 23
 large earthquakes in western North America between 1940 and 1980.  Our
 first example plots the maximum horizontal acceleration measured
 against distance of the measuring station from the epicenter.
-<<>>=
-data(Earthquake, package = "nlme")
-xyplot(accel ~ distance, data = Earthquake)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> data(Earthquake, package = "nlme")
+> xyplot(accel ~ distance, data = Earthquake)
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-034}
 \end{center}
 The plot shows patterns typical of a right skewed distribution, and
 can be improved by plotting the data on a log scale.  It is common to
 add a reference grid and some sort of smooth; for example,
-<<>>=
-xyplot(accel ~ distance, data = Earthquake, scales = list(log = TRUE), 
-       type = c("p", "g", "smooth"), xlab = "Distance From Epicenter (km)",
-       ylab = "Maximum Horizontal Acceleration (g)")
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> xyplot(accel ~ distance, data = Earthquake, scales = list(log = TRUE), 
+         type = c("p", "g", "smooth"), xlab = "Distance From Epicenter (km)",
+         ylab = "Maximum Horizontal Acceleration (g)")
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-036}
 \end{center}
 
 
@@ -626,15 +673,32 @@ analogues of factors, with levels defined by possibly overlapping
 intervals.  Using the \code{quakes} dataset again, we can try to
 understand the three-dimensional distribution of earthquake epicenters
 by looking at a series of two-dimensional scatter plots.
-<<>>=
-Depth <- equal.count(quakes$depth, number=8, overlap=.1)
-summary(Depth)
-xyplot(lat ~ long | Depth, data = quakes)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> Depth <- equal.count(quakes$depth, number=8, overlap=.1)
+> summary(Depth)
+\end{Sinput}
+\begin{Soutput}
+Intervals:
+    min   max count
+1  39.5  63.5   138
+2  60.5 102.5   138
+3  97.5 175.5   138
+4 161.5 249.5   142
+5 242.5 460.5   138
+6 421.5 543.5   137
+7 537.5 590.5   140
+8 586.5 680.5   137
+
+Overlap between adjacent intervals:
+[1] 16 14 19 15 14 15 15
+\end{Soutput}
+\begin{Sinput}
+> xyplot(lat ~ long | Depth, data = quakes)
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=6>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-038}
 \end{center}
 
 
@@ -646,16 +710,16 @@ plot(trellis.last.object())
 
 Of course, for continuous trivariate data, it may be more effective to
 use a three-dimensional scatter plot.
-<<>>=
-cloud(depth ~ lat * long, data = quakes,
-      zlim = rev(range(quakes$depth)),
-      screen = list(z = 105, x = -70), panel.aspect = 0.75,
-      xlab = "Longitude", ylab = "Latitude", zlab = "Depth")
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> cloud(depth ~ lat * long, data = quakes,
+        zlim = rev(range(quakes$depth)),
+        screen = list(z = 105, x = -70), panel.aspect = 0.75,
+        xlab = "Longitude", ylab = "Latitude", zlab = "Depth")
+\end{Sinput}
+\end{Schunk}
 \begin{center}
-<<fig=TRUE,echo=FALSE,height=4>>=
-plot(trellis.last.object())
-@ 
+\includegraphics{figs/intro-040}
 \end{center}
 Static three-dimensional scatter plots are not very useful because of
 the strong effect of ``camera'' direction.  Unfortunately, \lattice\
@@ -690,17 +754,20 @@ plot anything.  Instead, they return an object of class
 cases, the user does not see any difference in behaviour.  Here is one
 example where we use optional arguments of the \Rfunction{plot} method
 for \class{trellis} objects to display two plots side by side.
-<<fig=TRUE,echo=TRUE,height=8>>=
-dp.uspe <-
-    dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
-            xlab = "Expenditure (billion dollars)")
-dp.uspe.log <-
-    dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
-            scales = list(x = list(log = 2)),
-            xlab = "Expenditure (billion dollars)")
-plot(dp.uspe,     split = c(1, 1, 2, 1))
-plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> dp.uspe <-
+      dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
+              xlab = "Expenditure (billion dollars)")
+> dp.uspe.log <-
+      dotplot(t(USPersonalExpenditure), groups = FALSE, layout = c(1, 5),
+              scales = list(x = list(log = 2)),
+              xlab = "Expenditure (billion dollars)")
+> plot(dp.uspe,     split = c(1, 1, 2, 1))
+> plot(dp.uspe.log, split = c(2, 1, 2, 1), newpage = FALSE)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{figs/intro-041}
 
 
 
@@ -751,10 +818,15 @@ sense.  Other useful material are
 
 \subsection*{Session information}
 
-<<echo=FALSE,results=tex>>=
-toLatex(sessionInfo())
-@ 
-
+\begin{itemize}\raggedright
+  \item R version 2.14.0 Under development (unstable) (2011-05-07 r55801), \verb|x86_64-unknown-linux-gnu|
+  \item Locale: \verb|LC_CTYPE=en_IN|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=en_IN|, \verb|LC_COLLATE=en_IN|, \verb|LC_MONETARY=en_IN|, \verb|LC_MESSAGES=en_IN|, \verb|LC_PAPER=C|, \verb|LC_NAME=C|, \verb|LC_ADDRESS=C|, \verb|LC_TELEPHONE=C|, \verb|LC_MEASUREMENT=en_IN|, \verb|LC_IDENTIFICATION=C|
+  \item Base packages: base, datasets, graphics, grDevices,
+    methods, stats, utils
+  \item Other packages: lattice~0.19-26
+  \item Loaded via a namespace (and not attached):
+    grid~2.14.0, tools~2.14.0
+\end{itemize}
 
 
 \bibliography{references}

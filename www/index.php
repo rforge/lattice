@@ -1,53 +1,75 @@
-
-<!-- This is the project specific website template -->
-<!-- It can be changed as liked or replaced by other content -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                      "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Lattice: trellis graphics for R</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link id="doc_style" rel="stylesheet" href="style.css" type="text/css" />
+<script language="JavaScript" type="text/javascript" src="Nifty/niftycube.js"></script> 
+<script language="JavaScript" type="text/javascript" src="setup.js"></script>
+</head>
+<body onload="setup();">
 
 <?php
 
-$domain=ereg_replace('[^\.]*\.(.*)$','\1',$_SERVER['HTTP_HOST']);
-$group_name=ereg_replace('([^\.]*)\..*$','\1',$_SERVER['HTTP_HOST']);
-$themeroot='http://r-forge.r-project.org/themes/rforge/';
+include('./header.php');
+include('./navigation.php');
 
-echo '<?xml version="1.0" encoding="UTF-8"?>';
 ?>
-<!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en   ">
 
-  <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title><?php echo $group_name; ?></title>
-	<link href="<?php echo $themeroot; ?>styles/estilo1.css" rel="stylesheet" type="text/css" />
-  </head>
-
-<body>
-
-<! --- R-Forge Logo --- >
-<table border="0" width="100%" cellspacing="0" cellpadding="0">
-<tr><td>
-<a href="/"><img src="<?php echo $themeroot; ?>/images/logo.png" border="0" alt="R-Forge Logo" /> </a> </td> </tr>
-</table>
+<div id="bodyText">
 
 
-<!-- get project title  -->
-<!-- own website starts here, the following may be changed as you like -->
+  <!-- <h1>About</h1> -->
 
-<?php if ($handle=fopen('http://'.$domain.'/export/projtitl.php?group_name='.$group_name,'r')){
-$contents = '';
-while (!feof($handle)) {
-	$contents .= fread($handle, 8192);
-}
-fclose($handle);
-echo $contents; } ?>
+  <p> The lattice add-on package is an implementation of Trellis
+  graphics for R. It is a powerful and elegant high-level data
+  visualization system with an emphasis on multivariate data. It is
+  designed to meet most typical graphics needs with minimal tuning,
+  but can also be easily extended to handle most nonstandard
+  requirements.  </p>
 
-<!-- end of project description -->
+  <p> <a
+  href="http://cm.bell-labs.com/cm/ms/departments/sia/project/trellis/"
+  >Trellis Graphics</a>, originally developed for S and S-PLUS at the
+  Bell Labs, is a framework for data visualization developed by
+  R. A. Becker, W. S. Cleveland, et al, extending ideas presented in
+  Cleveland’s 1993 book <a
+  href="http://www.stat.purdue.edu/~wsc/visualizing.html" >Visualizing
+  Data</a>. The Lattice API is based on the original design in S, but
+  extends it in many ways.  </p>
 
-<p> No content added. </p>
+  
+  <h2>Installation</h2>
 
-<p> You can find the <strong>project summary page</strong> <a
-href="http://<?php echo $domain; ?>/projects/<?php echo $group_name;
-?>/"><strong>here</strong></a>. </p>
+  <p>The lattice package is usually installed along with R. You can
+  start using it after loading it by typing</p>
+  <div class="code">
+  <code>&gt; library(package = "lattice")</code>
+  </div>
+  <p>in your R session. </p>
+
+  <p>The latest released version of lattice, which may be more recent
+  than the version that came with R, is available from <a
+  href="http://cran.r-project.org/web/packages/lattice/" >CRAN</a>.
+  The latest development snapshot is available from <a
+  href="https://r-forge.r-project.org/R/?group_id=638"
+  >R-forge</a></p>
+
+  <h2>LatticeExtra</h2>
+
+  <p>If you find lattice useful, you may also be interested in the <a
+  href="http://latticeextra.r-forge.r-project.org/" >latticeExtra</a>
+  package, which supplements and extends the capabilties of
+  lattice. </p>
+  
+</div>
+
+  
+<?php
+include('./footer.php');
+?>
+
 
 </body>
 </html>

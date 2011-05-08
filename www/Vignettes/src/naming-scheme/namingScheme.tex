@@ -1,0 +1,163 @@
+\documentclass[10pt]{article}
+
+\newcommand{\pkg}[1]{{\bfseries #1}}
+\newcommand{\code}[1]{{\ttfamily #1}}
+
+\title{A Naming Scheme for Lattice Grobs} 
+\author{Paul Murrell}
+\date{}
+
+\usepackage[text={6.5in,8.5in},centering]{geometry}
+\usepackage[round]{natbib}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+
+% \usepackage{Sweave}
+% \setkeys{Gin}{width=0.98\textwidth}
+
+\begin{document}
+\maketitle
+
+\raggedright
+
+
+\section*{A Naming Scheme for \pkg{lattice} Grobs}
+
+% Lots of really long grob names
+\sloppy 
+
+All grobs produced by \pkg{lattice} should be provided with names
+using the following guidelines:
+
+\begin{itemize}
+\item
+All names should be generated using a call to \code{trellis.grobname()}.
+
+The argument \code{name} provides the main descriptive name for the grob.
+
+The argument \code{prefix} is used to distinguish between 
+different plots on the same page (this defaults using
+\code{lattice.getStatus()}).  This prefix is prepended to all grob names.
+
+The argument \code{type} is used to distinguish between grobs that are
+once-per-plot and grobs that are once-per-panel.  The latter are
+produced by specifying \code{"panel"}, \code{"strip"}, or
+\code{"strip.left"} for \code{type}.  In those cases, a suffix is
+added to the grob name of the form \code{"panel.i.j"}, where the
+\code{i} an \code{j} come from the arguments \code{row} and
+\code{column} and those arguments
+ get default values from \code{lattice.getStatus()}).
+The naming of strip grobs is similar, except that it can be more
+complicated when there are multiple conditioning variables (and hence
+multile strips per panel).  In that case, the grob suffix will be of
+the form \code{"given.k.strip.i.j"}, where \code{k} comes from
+the argument \code{which.given}, but that only occurs if
+the argument \code{which.panel} has length greater than 1.
+Both of those arguments get their default
+values from \code{lattice.getStatus()} so there is usually no need
+to explicitly provide them.
+
+The argument \code{group} is used to distinguish between grobs that are
+once-per-group (within a panel).  A value greater than zero causes
+a suffix of the form \code{"group.i"} to be appended to the grob name
+(before any panel suffix).
+
+The argument \code{type} can also be \code{"key"} or \code{"colorkey"}.
+These are used to name the components of \code{draw.key()} and
+\code{draw.colorkey()}.  The latter is simple because all components
+are distinct, so you get names of the form \code{"plot\_01.colorkey.border"}.
+The \code{draw.key()} components are a little more complex because
+the contents of a legend can be quite flexible.  There are some
+straightforward components like \code{"plot\_01.key.title"},
+but the general contents are of the form \code{"plot\_01.key.text.1.1"}
+where the \code{"1.1"} refers to the appropriate column and row 
+of the legend contents.
+
+
+\item
+In some cases, particularly for once-per-plot grobs, there are one-off
+\pkg{grid} function calls.  A good example is the background rect for
+the entire plot that is drawn by \code{plot.trellis()}.  Such cases 
+only require a descriptive name and \code{type=""}.  For example ...
+
+\begin{verbatim}
+grid.rect(name=trellis.grobname("background", type=""),
+          gp = gpar(fill = bg, col = "transparent"))
+\end{verbatim}
+
+... produces something like \code{"plot\_01.background"}.
+
+There are other examples of this sort of once-per-plot grob in
+some panel functions.
+
+\item
+Most drawing of grobs occurs through a call to one of the primitive
+functions, \code{ltext()}, \code{llines()}, etc (or their ``skins'', 
+\code{panel.text()}, \code{panel.lines()}, etc).  The 
+
+These functions produce a basic descriptive name, e.g., \code{"text"}
+for \code{ltext()} and, by default, add panel information.  
+These functions also add
+group information if appropriate (this is based on detecting a 
+special argument that \code{panel.superpose()} passes down, i.e., 
+a test that the function has been called by \code{panel.superpose()}).
+For example, a direct call to \code{panel.points()} will produce a grob name
+of the form \code{"plot\_01.points.panel.1.1"}.
+
+These functions also 
+have an \code{identifier} argument which, if non-\code{NULL},
+gets prepended to the descriptive grob name.  This allows higher-level
+panel functions to provide a distinctive prefix for primitive grobs.
+For example, a call to \code{panel.xyplot()}, which calls 
+\code{panel.points()}, will produce a grob name
+of the form \code{"plot\_01.xyplot.points.panel.1.1"}.
+
+The \code{identifier} argument also allows the user to produce
+distinct names for primitive grobs when writing a panel function.
+For example, ...
+
+\begin{verbatim}
+mypanel <- function(x, y, ...) {
+    panel.xyplot(x, y, ...)
+    panel.points(a, b, identifier = "extra")
+}
+\end{verbatim}
+
+... will produce something like \code{"plot\_01.xyplot.points.panel.1.1"}
+for the default points and \code{"plot\_01.extra.points.panel.1.1"} for
+the custom points.
+
+There is also a \code{name.type} argument, which is a character value
+indicating whether to add panel (or strip) information to the grob name.
+This corresponds directly to the \code{type} argument to 
+\code{trellis.grobname()}.
+The additional information can be left out by specifying \code{name.type=""}.
+
+\item
+Higher-level panel functions come in two types.  Some, 
+like \code{panel.abline()}, make direct \pkg{grid} calls, so they 
+have a similar set up to the primitive panel functions above.
+Others make calls to the primitive panel functions, in which case they
+provide descriptive \code{identifier} arguments for those calls.
+
+For example, \code{panel.densityplot()} may call \code{panel.points()} to
+draw raw values and \code{panel.lines()} to draw the density curve.
+For both calls, it specifies
+\code{identifier = "density"}, so that the resulting grobs have names
+of the form \code{"plot\_01.density.points.panel.1.1"} and
+\code{"plot\_01.density.lines.panel.1.1"}.
+
+These higher-level panel functions also have an \code{identifier} argument
+so that users can call them in custom panel functions and provide
+a unique identifier for grobs that they add.
+
+\item 
+Any user customisations to a \pkg{lattice} plot 
+that use raw \pkg{grid} calls can specify whatever
+\code{name} for a grob that they like.
+
+\end{itemize}
+
+\end{document}

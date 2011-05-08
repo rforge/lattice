@@ -1,40 +1,33 @@
 
-R_PROG = R-devel
+R_PROG = R
 ## put alternative definitions in Makevars
 -include Makevars
 
-R_HOME = `${R_PROG} RHOME`
-TPUTS = ${TEXINPUTS}:${R_HOME}/share/texmf/:tex/
-
-
 TEX_COMPS = defs
-
 RNW_COMPS = lattice-intro lattice-intro-slides
 
-
-all: lattice-intro.pdf lattice-intro-slides.pdf
-#latticeTips-handout-6.pdf
+all: lattice-intro.pdf
 
 clean:
 	rm -f *.log *.dvi *.ps *.toc *.nav *.out *.vrb *.aux *.snm *.R figs/* *~ */*~
 
 %.tex: %.Rnw
-	echo "library(tools); options(continue = '  '); Sweave('$<')" | ${R_PROG} --vanilla --silent
-	rm -f Rplots.pdf
+	${R_PROG} CMD Sweave $<
+	rm -f Rplots.pdf Rplots.ps
 
 %.R: %.Rnw
-	echo "library(tools); Stangle('$<')" | ${R_PROG} --vanilla --silent
+	${R_PROG} CMD Stangle $<
 
 %.dvi : %.tex
-	TEXINPUTS=${TPUTS} texi2dvi -q -c $<
+	${R_PROG} CMD texi2dvi -q -c $<
 
 %.ps : %.dvi
-	TEXINPUTS=${TPUTS} dvips -o -q $<
+	${R_PROG} CMD dvips -o -q $<
 
 %.pdf : %.tex
-	TEXINPUTS=${TPUTS} pdflatex $<
-	TEXINPUTS=${TPUTS} pdflatex $<
-
+	${R_PROG} CMD pdflatex $<
+	${R_PROG} CMD pdflatex $<
+	${R_PROG} CMD pdflatex $<
 
 %-4.tex: %.pdf
 	@echo "\\documentclass[letterpaper,landscape,frame]{article}" > $@
