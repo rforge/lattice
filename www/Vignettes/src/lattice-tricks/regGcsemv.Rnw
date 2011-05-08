@@ -11,8 +11,8 @@ data(Gcsemv, package = "mlmRev")
 
 
 
-\begin{frame}
-  \frametitle{GCSE exam scores}
+
+  \subsection*{GCSE exam scores}
   \begin{itemize}
   \item \code{Gcsemv}: model written score by coursework and gender
   \item A similar approach does not work as well
@@ -21,12 +21,11 @@ data(Gcsemv, package = "mlmRev")
     \item missing values are omitted from fitted model
     \end{itemize}
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<>>=  
 fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
 xyplot(written + fitted(fm) ~ course | gender, 
@@ -37,12 +36,11 @@ xyplot(written + fitted(fm) ~ course | gender,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  %\frametitle{GCSE exam scores}
+
+  %\subsection*{GCSE exam scores}
   \begin{itemize}
   \item Built-in solution: Simple Linear Regression in each panel
   \end{itemize}
@@ -53,13 +51,12 @@ xyplot(written ~ course | gender, Gcsemv,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
-\begin{frame}[fragile]
-  \frametitle{GCSE exam scores}
+
+  \subsection*{GCSE exam scores}
   \begin{itemize}
   \item More complex models need a little more work
   \item Consider three models:
@@ -70,10 +67,9 @@ fm2 <- lm(written ~ course * gender, Gcsemv)
 @
   \item Goal: compare \code{fm2} and \code{fm1} with \code{fm0}
   \end{itemize}
-\end{frame}
 
 
-\begin{frame}[plain]
+
 <<echo=FALSE>>=
 
 grid <-
@@ -98,13 +94,12 @@ xyplot(written ~ course | gender, combined, groups = which,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
-\begin{frame}[fragile]
-  %% \frametitle{One Approach}
+
+  %% \subsection*{One Approach}
   \begin{itemize}
   \item Solution: evaluate fits separately and combine
   %% \item Generalizes to more models, other types of models
@@ -128,21 +123,19 @@ fm2.pred <-
 orig <- Gcsemv[c("course", "gender", "written")]
 @
   \end{itemize}
-\end{frame}
 
 
-\begin{frame}[fragile]
+
 <<>>=
 
 str(orig)
 str(fm0.pred)
 
 @
-\end{frame}
 
 
-\begin{frame}[fragile]
-  % \frametitle{Approach: evaluate fits separately and combine}
+
+  % \subsection*{Approach: evaluate fits separately and combine}
 <<>>=
 
 combined <-
@@ -153,12 +146,11 @@ combined <-
 str(combined)
 
 @
-\end{frame}
 
 
 
 
-\begin{frame}[plain, fragile]
+
 <<>>=
 xyplot(written ~ course | gender, 
        data = combined, groups = which,
@@ -167,13 +159,13 @@ xyplot(written ~ course | gender,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
-% \begin{frame}
-%   \frametitle{}
+
+% 
+%   \subsection*{}
 %   \begin{itemize}
 %   \item Generalizes to
 %     \begin{itemize}
@@ -181,6 +173,6 @@ plot(trellis.last.object())
 %     \item Non-linear models
 %     \end{itemize}
 %   \end{itemize}
-% \end{frame}
+% 
 
 

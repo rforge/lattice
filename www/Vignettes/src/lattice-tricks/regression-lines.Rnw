@@ -1,0 +1,580 @@
+\documentclass[10pt]{article}
+
+\title{Displaying model fits in lattice plots}
+\author{Deepayan Sarkar}
+\date{}
+
+\usepackage[text={6.5in,8.5in},centering]{geometry}
+\usepackage{bm}
+\usepackage[round]{natbib}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{Sweave}
+\setkeys{Gin}{width=0.98\textwidth}
+
+\newcommand{\fixme}[1]{\emph{\small \textbf{#1}}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\lattice}{\code{lattice}}
+\newcommand{\Rpackage}[1]{\code{#1}}
+\newcommand{\Rfunction}[1]{\code{#1()}}
+\newcommand{\class}[1]{\textit{``#1''}}
+
+
+\newcommand{\dontshow}[1]{}
+
+\newtheorem{exercise}{Exercise}
+\newenvironment{solution}{}{}
+
+
+\begin{document}
+\maketitle
+
+\raggedright
+
+
+\SweaveOpts{keep.source=TRUE,pdf=TRUE,eps=FALSE,width=9,prefix.string=figs/modelfit}
+
+
+<<echo=FALSE,results=hide>>=
+library(lattice)
+lattice.options(default.theme = standard.theme("pdf", color = TRUE),
+                panel.error = NULL)
+options(width = 70, 
+        str = list(strict.width = 'cut', 
+                   digits.d = 3, vec.len = 3), 
+        continue = '  ')
+@ 
+
+
+
+\lattice\ is an add-on package that implements Trellis graphics
+(originally developed for \textsf{S} and \textsf{S-PLUS}) in \R.  It
+is a powerful and elegant high-level data visualization system, with
+an emphasis on multivariate data, that is sufficient for typical
+graphics needs, and is also flexible enough to handle most nonstandard
+requirements.  
+\\
+
+This document discusses the common situation where we want to augment
+a raw data plot with a model fit.  We will use two examples.
+
+
+
+
+
+\section{Regression Lines}
+
+
+  \subsection*{Example 1: Growth curves}
+  \begin{itemize}
+  \item Heights of boys from Oxford over time
+  \item 26 boys, height measured on 9 occasions
+<<>>=  
+data(Oxboys, package = "nlme")
+head(Oxboys)
+@ 
+  \end{itemize}
+
+
+
+
+  % \subsection*{}
+<<>>=  
+xyplot(height ~ age | Subject, data = Oxboys, 
+       strip = FALSE, aspect = "xy", pch = 16,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+
+
+  \subsection*{Example 2: Exam scores}
+  \begin{itemize}
+  \item GCSE exam scores on a science subject. Two components:
+    \begin{itemize}
+    \item course work
+    \item written paper
+    \end{itemize}
+  \item 1905 students
+<<>>=  
+data(Gcsemv, package = "mlmRev")
+head(Gcsemv)
+@ 
+  \end{itemize}
+
+
+
+
+  % \subsection*{}
+<<>>=  
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+  \subsection*{Adding to a Lattice display}
+  \begin{itemize}
+  \item Traditional \R\ graphics encourages incremental additions
+  \item The Lattice analogue is to write panel functions
+  \end{itemize}
+
+
+
+
+
+  \subsection*{A simple panel function}
+  \begin{itemize}
+  \item Things to know:
+    \begin{itemize}
+    \item Panel functions are functions (!)
+    \item They are responsible for graphical content inside panels
+    \item They get executed once for every panel
+    \item Every high level function has a default panel function\\
+      e.g., \Rfunction{xyplot} has default panel function
+      \Rfunction{panel.xyplot}
+    \end{itemize}
+  \end{itemize}
+
+
+
+
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = panel.xyplot)
+@ 
+  \end{itemize}
+
+
+
+
+
+
+
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(...) {
+           panel.xyplot(...)
+       })
+@ 
+  \end{itemize}
+
+
+
+
+  \begin{itemize}
+  \item So, equivalent call:
+<<eval=FALSE>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+       })
+@ 
+  \end{itemize}
+
+
+
+
+
+  \begin{itemize}
+  \item Now, we can add a couple of elements:
+<<>>=    
+xyplot(written ~ course | gender, data = Gcsemv, 
+       xlab = "Coursework score", 
+       ylab = "Written exam score",
+       panel = function(x, y, ...) {
+           panel.grid(h = -1, v = -1)
+           panel.xyplot(x, y, ...)
+           panel.loess(x, y, ..., col = "black")
+           panel.rug(x = x[is.na(y)], 
+                     y = y[is.na(x)])
+       })
+@ 
+  \end{itemize}
+
+
+
+
+  % \subsection*{}
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+  \subsection*{Panel functions}
+  Another useful feature: argument passing
+%   \begin{itemize}
+%   \item 
+%   \end{itemize}
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, 
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ..., 
+                        type = c("g", "p", "smooth"),
+                        col.line = "black")
+       })
+@ 
+is equivalent to 
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, 
+       type = c("g", "p", "smooth"), col.line = "black")
+@ 
+
+
+
+
+  % \subsection*{}
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+
+  \subsection*{Passing arguments to panel functions}
+  \begin{itemize}
+  \item Requires knowledge of arguments supported by panel function
+  \item Each high-level function has a corresponding \textit{default}
+    panel function, named as ``\code{panel.}'' followed by the
+    function name.  For example,
+    \begin{itemize}
+    \item \Rfunction{histogram} has panel function \code{panel.histogram}
+    \item \Rfunction{dotplot} has panel function \code{panel.dotplot}
+    \end{itemize}
+  \item Most have useful arguments that support common variants
+  \end{itemize}
+
+
+
+
+\input{regOxboys}
+
+<<echo=FALSE,results=hide>>=
+data(Oxboys, package = "nlme")
+@ 
+
+
+
+  \subsection*{Back to regression lines}
+  \begin{itemize}
+  \item \code{Oxboys}: model height on age
+    \[
+    \bm{y}_{ij} = \mu + \bm{b}_i + \bm{x}_{ij} + \bm{x}_{ij}^2 + \varepsilon_{ij}
+    \]
+  \item Mixed effect model that can be fit with \code{lme4}
+<<results=hide>>=    
+library(lme4)
+fm.poly <- 
+    lmer(height ~ poly(age, 2) + (1 | Subject), 
+         data = Oxboys)
+@ 
+% <<>>=
+% fm.poly
+% @ 
+
+  \item Goal: plot of data with fitted curve superposed 
+  \end{itemize}
+
+
+
+
+  % \subsection*{}
+<<echo=FALSE>>=  
+xyplot(height + fitted(fm.poly) ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
+       type = c("p", "l"), distribute.type = TRUE,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+  % \subsection*{}
+<<>>=  
+xyplot(height ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy",
+       type = "p", pch = 16,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+  % \subsection*{}
+<<>>=  
+xyplot(fitted(fm.poly) ~ age | Subject, 
+       data = Oxboys, strip = FALSE, aspect = "xy",
+       type = "l", lwd = 2,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+
+  % \subsection*{}
+<<>>=  
+xyplot(height + fitted(fm.poly) ~ age | Subject,
+       data = Oxboys, strip = FALSE, aspect = "xy", pch = 16,
+       lwd = 2, type = c("p", "l"), distribute.type = TRUE,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+\input{regGcsemv}
+
+
+<<echo=FALSE,results=hide>>=
+data(Gcsemv, package = "mlmRev")
+@ 
+
+
+
+
+  \subsection*{GCSE exam scores}
+  \begin{itemize}
+  \item \code{Gcsemv}: model written score by coursework and gender
+  \item A similar approach does not work as well
+    \begin{itemize}
+    \item $x$ values are not ordered
+    \item missing values are omitted from fitted model
+    \end{itemize}
+  \end{itemize}
+
+
+
+
+  % \subsection*{}
+<<>>=  
+fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
+xyplot(written + fitted(fm) ~ course | gender, 
+       data = subset(Gcsemv, !(is.na(written) | is.na(course))),
+       type = c("p", "l"), distribute.type = TRUE)
+
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+  %\subsection*{GCSE exam scores}
+  \begin{itemize}
+  \item Built-in solution: Simple Linear Regression in each panel
+  \end{itemize}
+<<>>=  
+xyplot(written ~ course | gender, Gcsemv, 
+       type = c("p", "r"), col.line = "black")
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+  \subsection*{GCSE exam scores}
+  \begin{itemize}
+  \item More complex models need a little more work
+  \item Consider three models:
+<<>>=
+fm0 <- lm(written ~ course, Gcsemv)
+fm1 <- lm(written ~ course + gender, Gcsemv)
+fm2 <- lm(written ~ course * gender, Gcsemv)
+@
+  \item Goal: compare \code{fm2} and \code{fm1} with \code{fm0}
+  \end{itemize}
+
+
+
+<<echo=FALSE>>=
+
+grid <-
+    expand.grid(course = do.breaks(range(Gcsemv$course, finite = TRUE), 30),
+                gender = unique(Gcsemv$gender))
+
+fm0.pred <- cbind(grid, written = predict(fm0, newdata = grid))
+fm1.pred <- cbind(grid, written = predict(fm1, newdata = grid))
+fm2.pred <- cbind(grid, written = predict(fm2, newdata = grid))
+
+orig <- Gcsemv[c("course", "gender", "written")]
+
+combined <-
+    make.groups(original = orig, 
+                fm0 = fm0.pred,
+                fm2 = fm2.pred)
+
+xyplot(written ~ course | gender, combined, groups = which,
+       type = c("p", "l", "l"), distribute.type = TRUE)
+
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+  %% \subsection*{One Approach}
+  \begin{itemize}
+  \item Solution: evaluate fits separately and combine
+  %% \item Generalizes to more models, other types of models
+<<>>=
+
+course.rng <- range(Gcsemv$course, finite = TRUE)
+grid <-
+    expand.grid(course = do.breaks(course.rng, 30),
+                gender = unique(Gcsemv$gender))
+
+fm0.pred <- 
+    cbind(grid, 
+          written = predict(fm0, newdata = grid))
+fm1.pred <- 
+    cbind(grid, 
+          written = predict(fm1, newdata = grid))
+fm2.pred <- 
+    cbind(grid, 
+          written = predict(fm2, newdata = grid))
+
+orig <- Gcsemv[c("course", "gender", "written")]
+@
+  \end{itemize}
+
+
+
+<<>>=
+
+str(orig)
+str(fm0.pred)
+
+@
+
+
+
+  % \subsection*{Approach: evaluate fits separately and combine}
+<<>>=
+
+combined <-
+    make.groups(original = orig, 
+                fm0 = fm0.pred,
+                fm2 = fm2.pred)
+
+str(combined)
+
+@
+
+
+
+
+
+<<>>=
+xyplot(written ~ course | gender, 
+       data = combined, groups = which,
+       type = c("p", "l", "l"), distribute.type = TRUE)
+@ 
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@ 
+
+
+
+
+
+% 
+%   \subsection*{}
+%   \begin{itemize}
+%   \item Generalizes to
+%     \begin{itemize}
+%     \item More than two fitted models
+%     \item Non-linear models
+%     \end{itemize}
+%   \end{itemize}
+% 
+
+
+
+
+\subsection{Reordering}
+
+% \input{reorder}
+
+
+\subsection{Summary}
+
+
+\paragraph{Take home message}
+\begin{itemize}
+\item Panel functions provide finest level of control
+\item Built-in panel functions are also powerful
+  \begin{itemize}
+  \item Easily taken advantage of using argument passing
+  \item Requires knowledge of arguments (read documentation!)
+  \item Special function \Rfunction{panel.superpose} useful for
+    grouping
+  \end{itemize}
+\end{itemize}
+
+
+
+
+\subsection*{Session information}
+
+<<echo=FALSE,results=tex>>=
+toLatex(sessionInfo())
+@ 
+
+
+
+\bibliography{references}
+\bibliographystyle{abbrvnat}
+
+
+\end{document}

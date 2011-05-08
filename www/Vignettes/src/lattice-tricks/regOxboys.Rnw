@@ -11,8 +11,7 @@ data(Oxboys, package = "nlme")
 
 
 
-\begin{frame}[fragile]
-  \frametitle{Back to regression lines}
+  \subsection*{Back to regression lines}
   \begin{itemize}
   \item \code{Oxboys}: model height on age
     \[
@@ -31,12 +30,11 @@ fm.poly <-
 
   \item Goal: plot of data with fitted curve superposed 
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<echo=FALSE>>=  
 xyplot(height + fitted(fm.poly) ~ age | Subject, 
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
@@ -46,12 +44,11 @@ xyplot(height + fitted(fm.poly) ~ age | Subject,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<>>=  
 xyplot(height ~ age | Subject, 
        data = Oxboys, strip = FALSE, aspect = "xy",
@@ -61,12 +58,11 @@ xyplot(height ~ age | Subject,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<>>=  
 xyplot(fitted(fm.poly) ~ age | Subject, 
        data = Oxboys, strip = FALSE, aspect = "xy",
@@ -76,14 +72,13 @@ xyplot(fitted(fm.poly) ~ age | Subject,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<>>=  
 xyplot(height + fitted(fm.poly) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16,
@@ -93,6 +88,6 @@ xyplot(height + fitted(fm.poly) ~ age | Subject,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
+
 
 

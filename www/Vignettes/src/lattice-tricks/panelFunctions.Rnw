@@ -10,8 +10,7 @@ library(lattice)
 
 
 
-\begin{frame}[fragile]
-  \frametitle{Example 1: Growth curves}
+  \subsection*{Example 1: Growth curves}
   \begin{itemize}
   \item Heights of boys from Oxford over time
   \item 26 boys, height measured on 9 occasions
@@ -20,12 +19,11 @@ data(Oxboys, package = "nlme")
 head(Oxboys)
 @ 
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+  % \subsection*{}
 <<>>=  
 xyplot(height ~ age | Subject, data = Oxboys, 
        strip = FALSE, aspect = "xy", pch = 16,
@@ -34,14 +32,14 @@ xyplot(height ~ age | Subject, data = Oxboys,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
 
-\begin{frame}[fragile]
-  \frametitle{Example 2: Exam scores}
+
+
+  \subsection*{Example 2: Exam scores}
   \begin{itemize}
   \item GCSE exam scores on a science subject. Two components:
     \begin{itemize}
@@ -54,11 +52,11 @@ data(Gcsemv, package = "mlmRev")
 head(Gcsemv)
 @ 
   \end{itemize}
-\end{frame}
 
 
-\begin{frame}[plain,fragile]
-  % \frametitle{}
+
+
+  % \subsection*{}
 <<>>=  
 xyplot(written ~ course | gender, data = Gcsemv, 
        xlab = "Coursework score", 
@@ -67,21 +65,21 @@ xyplot(written ~ course | gender, data = Gcsemv,
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
-\begin{frame}
-  \frametitle{Adding to a Lattice display}
+
+
+  \subsection*{Adding to a Lattice display}
   \begin{itemize}
   \item Traditional \R\ graphics encourages incremental additions
   \item The Lattice analogue is to write panel functions
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}
-  \frametitle{A simple panel function}
+
+
+  \subsection*{A simple panel function}
   \begin{itemize}
   \item Things to know:
     \begin{itemize}
@@ -93,12 +91,10 @@ plot(trellis.last.object())
       \Rfunction{panel.xyplot}
     \end{itemize}
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}[t,fragile]
-  \frametitle{A simple panel function}
+
   \begin{itemize}
   \item So, equivalent call:
 <<eval=FALSE>>=    
@@ -108,15 +104,13 @@ xyplot(written ~ course | gender, data = Gcsemv,
        panel = panel.xyplot)
 @ 
   \end{itemize}
-\end{frame}
 
 
 
 
 
 
-\begin{frame}[t,fragile]
-  \frametitle{A simple panel function}
+
   \begin{itemize}
   \item So, equivalent call:
 <<eval=FALSE>>=    
@@ -128,12 +122,10 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @ 
   \end{itemize}
-\end{frame}
 
 
 
-\begin{frame}[t,fragile]
-  \frametitle{A simple panel function}
+
   \begin{itemize}
   \item So, equivalent call:
 <<eval=FALSE>>=    
@@ -145,13 +137,11 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @ 
   \end{itemize}
-\end{frame}
 
 
 
 
-\begin{frame}[t,fragile]
-  \frametitle{A simple panel function}
+
   \begin{itemize}
   \item Now, we can add a couple of elements:
 <<>>=    
@@ -167,20 +157,20 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @ 
   \end{itemize}
-\end{frame}
 
 
-\begin{frame}[plain]
-  % \frametitle{}
+
+
+  % \subsection*{}
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
-\begin{frame}[fragile]
-  \frametitle{Panel functions}
+
+
+  \subsection*{Panel functions}
   Another useful feature: argument passing
 %   \begin{itemize}
 %   \item 
@@ -198,21 +188,21 @@ is equivalent to
 xyplot(written ~ course | gender, data = Gcsemv, 
        type = c("g", "p", "smooth"), col.line = "black")
 @ 
-\end{frame}
 
 
-\begin{frame}[plain]
-  % \frametitle{}
+
+
+  % \subsection*{}
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
-\end{frame}
 
 
 
 
-\begin{frame}
-  \frametitle{Passing arguments to panel functions}
+
+
+  \subsection*{Passing arguments to panel functions}
   \begin{itemize}
   \item Requires knowledge of arguments supported by panel function
   \item Each high-level function has a corresponding \textit{default}
@@ -224,7 +214,7 @@ plot(trellis.last.object())
     \end{itemize}
   \item Most have useful arguments that support common variants
   \end{itemize}
-\end{frame}
+
 
 
 

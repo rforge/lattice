@@ -1,19 +1,9 @@
 
-R_PROG = R-devel
+R_PROG = R
 ## put alternative definitions in Makevars
 -include Makevars
 
-R_HOME = `${R_PROG} RHOME`
-TPUTS = ${TEXINPUTS}:${R_HOME}/share/texmf/:tex/
-
-
-RNW_DEPS = panelFunctions regGcsemv regOxboys reorder
-
-all: lattice-tricks.pdf lattice-tricks-slides.pdf
-
-lattice-tricks-slides.tex: $(RNW_DEPS:=.tex)
-	${R_PROG} CMD Sweave lattice-tricks-slides.Rnw
-	rm -f Rplots.pdf
+all: regression-lines.pdf
 
 clean:
 	rm -f *.log *.dvi *.ps *.toc *.nav *.out *.vrb *.aux *.snm *.R figs/* *~ */*~
@@ -32,8 +22,9 @@ clean:
 	TEXINPUTS=${TPUTS} dvips -o -q $<
 
 %.pdf : %.tex
-	TEXINPUTS=${TPUTS} pdflatex $<
-	TEXINPUTS=${TPUTS} pdflatex $<
+	${R_PROG} CMD pdflatex $<
+	${R_PROG} CMD pdflatex $<
+	${R_PROG} CMD pdflatex $<
 
 
 %-4.tex: %.pdf
