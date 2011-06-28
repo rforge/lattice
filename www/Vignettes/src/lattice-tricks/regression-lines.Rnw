@@ -1,6 +1,6 @@
 \documentclass[10pt]{article}
 
-\title{Displaying model fits in lattice plots}
+\title{Displaying Hello World model fits in Lattice plots}
 \author{Deepayan Sarkar}
 \date{}
 
@@ -42,11 +42,11 @@
 library(lattice)
 lattice.options(default.theme = standard.theme("pdf", color = TRUE),
                 panel.error = NULL)
-options(width = 70, 
-        str = list(strict.width = 'cut', 
-                   digits.d = 3, vec.len = 3), 
+options(width = 70,
+        str = list(strict.width = 'cut',
+                   digits.d = 3, vec.len = 3),
         continue = '  ')
-@ 
+@
 
 
 
@@ -55,34 +55,34 @@ options(width = 70,
 is a powerful and elegant high-level data visualization system, with
 an emphasis on multivariate data, that is sufficient for typical
 graphics needs, and is also flexible enough to handle most nonstandard
-requirements.  
+requirements.
 \\
 
 This document discusses the common situation where we want to augment
 a raw data plot with a model fit.  We will use two illustrative
-examples.  
+examples.
 \\
 
 The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
 package, which records the growth (height) over time of 26 boys from
 Oxford.  Each boy had his height measured on 9 occasions.
-<<>>=  
+<<>>=
 data(Oxboys, package = "nlme")
 head(Oxboys)
-@ 
+@
 %
 A simple Trellis plot of the data can be obtained by
-<<>>=  
-xyplot(height ~ age | Subject, data = Oxboys, 
+<<>>=
+xyplot(height ~ age | Subject, data = Oxboys,
        strip = FALSE, aspect = "xy", pch = 16,
        xlab = "Standardized age", ylab = "Height (cm)")
-@ 
+@
 %
 Each panel represents one subject.  As the subject identifiers are
 uninformative, the usual strips on top of each panel is omitted.
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 %
 Our objective will be to fit growth curves (possibly nonlinear) to the
 data and superpose them on the plot.
@@ -94,20 +94,20 @@ in a science subject for 1905 students.  The marks in two components
 (course work and written paper) are recorded separately.  We are
 interested in modeling the expected written score based on course work
 score, taking into account the gender of the student.
-<<>>=  
+<<>>=
 data(Gcsemv, package = "mlmRev")
 head(Gcsemv)
-@ 
+@
 %
 A plot of the raw data is produced by
-<<>>=  
-xyplot(written ~ course | gender, data = Gcsemv, 
-       xlab = "Coursework score", 
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv,
+       xlab = "Coursework score",
        ylab = "Written exam score")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -132,12 +132,12 @@ Every high level function has a default panel function, e.g.,
 \Rfunction{xyplot} has default panel function
 \Rfunction{panel.xyplot}.  Thus, the code that produced the GCSE score
 plot above is equivalent to
-<<eval=FALSE>>=    
-xyplot(written ~ course | gender, data = Gcsemv, 
-       xlab = "Coursework score", 
+<<eval=FALSE>>=
+xyplot(written ~ course | gender, data = Gcsemv,
+       xlab = "Coursework score",
        ylab = "Written exam score",
        panel = panel.xyplot)
-@ 
+@
 %
 Here ``\code{panel.xyplot}'' is a (predefined) symbol whose value is a
 function.  But creating new functions is not at all difficult in \R.
@@ -145,14 +145,14 @@ Making things a little more complicated, but keeping the results
 unchanged, we can explicitly define a new inline function, which
 simply calls \Rfunction{panel.xyplot} with exactly the arguments given
 to it.
-<<eval=FALSE>>=    
-xyplot(written ~ course | gender, data = Gcsemv, 
-       xlab = "Coursework score", 
+<<eval=FALSE>>=
+xyplot(written ~ course | gender, data = Gcsemv,
+       xlab = "Coursework score",
        ylab = "Written exam score",
        panel = function(...) {
            panel.xyplot(...)
        })
-@ 
+@
 %
 Now, to do anything interesting with the data, we need to get access
 to the raw data for each panel.  For each high-level
@@ -162,14 +162,14 @@ depend on the high-level function).  Looking at the help page for
 \Rfunction{panel.xyplot} tells us that for our example these arguments
 are \code{x} and \code{y}.  Thus, another equivalent way to create the
 plot above is
-<<eval=FALSE>>=    
-xyplot(written ~ course | gender, data = Gcsemv, 
-       xlab = "Coursework score", 
+<<eval=FALSE>>=
+xyplot(written ~ course | gender, data = Gcsemv,
+       xlab = "Coursework score",
        ylab = "Written exam score",
        panel = function(x, y, ...) {
            panel.xyplot(x, y, ...)
        })
-@ 
+@
 %
 Here, we finally have access to the panel-specific data, but instead
 of doing anything with it (yet), we have simply called
@@ -183,29 +183,30 @@ concepts that have been introduced to appreciate the next example.
 
 Now that we have access to the data inside the inline panel function
 we are defining, we can use it to add further elements to the plot.
-In the following, we add several elements: a reference grid (which
-does not really depend on the data), a loess fit, and marginal
+In the following example, we add several elements: a reference grid
+(which does not really depend on the data), a loess fit, and marginal
 ``rugs'' indicating cases where one (but not both) of the score
-components were missing.
-<<>>=    
-xyplot(written ~ course | gender, data = Gcsemv, 
-       xlab = "Coursework score", 
+components are missing.
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv,
+       xlab = "Coursework score",
        ylab = "Written exam score",
        panel = function(x, y, ...) {
            panel.grid(h = -1, v = -1)
            panel.xyplot(x, y, ...)
            panel.loess(x, y, ..., col = "black")
-           panel.rug(x = x[is.na(y)], 
+           panel.rug(x = x[is.na(y)],
                      y = y[is.na(x)])
        })
-@ 
+
+@
 %
 Here the individual elements are added by the component functions
-\Rfunction{panel.grid}, \Rfunction{panel.loess}, \Rfunction{rug},
-etc., which all produce some form of graphical output, based on
-arguments supplied to it.  Together they define a \emph{procedure} for
-plotting the data in a panel, encapsulated in the ``panel function''.
-Notice that we also needed to include a call to
+\Rfunction{panel.grid}, \Rfunction{panel.loess},
+\Rfunction{panel.rug}, etc., which all produce some form of graphical
+output, based on arguments supplied to it.  Together they define a
+\emph{procedure} for plotting the data in a panel, encapsulated in the
+``panel function''.  Notice that we also needed to include a call to
 \Rfunction{panel.xyplot}, as without it the raw data would not have
 been plotted.  Also notice that \Rfunction{panel.grid} is called
 \emph{before} it, so that the grid is rendered \emph{below} the
@@ -213,10 +214,10 @@ points.  Having the panel function control the display completely
 allows this kind of fine control.
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
-\subsection*{Passing arguments through \dots}
+\subsection*{Passing arguments through the \code{\dots} argument}
 
 We have used a \code{\dots} construct in all the panel functions
 defined above; it is now time to understand how it works.  The idea is
@@ -227,11 +228,13 @@ further arguments not matching the named arguments.  These arguments
 can then be passed on to other functions called by it, where it may
 match a named argument.  The first explicit use of an inline function
 above provides an example of this:
-<<eval=FALSE>>=
+\begin{Schunk}
+\begin{Sinput}
        panel = function(...) {
            panel.xyplot(...)
-       })
-@ 
+       }
+\end{Sinput}
+\end{Schunk}
 %
 The \code{panel} function is called with arguments named \code{x} and
 \code{y}.  Although \code{panel} itself does not recognize these
@@ -249,40 +252,44 @@ ways.  In particular, two of its arguments, \code{grid} and
 fitted loess smooth respectively (see \code{help(panel.xyplot)} for
 details).  For example, we may write
 <<>>=
-xyplot(written ~ course | gender, data = Gcsemv, 
+xyplot(written ~ course | gender, data = Gcsemv,
        panel = function(x, y) {
            panel.xyplot(x, y, grid = TRUE,
                         type = c("p", "smooth"),
                         col.line = "black")
        })
-@ 
+@
 %
-A useful observation is that this is equivalent to 
+A useful observation is that this is equivalent to
 <<>>=
-xyplot(written ~ course | gender, data = Gcsemv, 
+xyplot(written ~ course | gender, data = Gcsemv,
        grid = TRUE, type = c("p", "spline"), col.line = "black",
        panel = function(x, y, ...) {
            panel.xyplot(x, y, ...)
        })
-@ 
+@
 %
 This is a consequence of how \Rfunction{xyplot} itself is designed; it
 has a \code{\dots} argument, and arguments that are not otherwise
 recognized by \Rfunction{xyplot} are passed on to the panel function.
 Notice how the panel function in the last plot is similar to our
-initial panel function examples that did nothing special.  
-
-
-is equivalent to 
+initial panel function examples that did nothing special.  Following
+our arguments in the reverse direction, we now see that the above is equivalent to
 <<>>=
-xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE, 
+xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
+       type = c("p", "spline"), col.line = "black",
+       panel = panel.xyplot)
+@
+%
+and hence also equivalent to
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
        type = c("p", "spline"), col.line = "black")
-@ 
-
+@
 
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -303,7 +310,7 @@ plot(trellis.last.object())
   \end{itemize}
 
 
-  
+
 
   \subsection*{Back to regression lines}
   \begin{itemize}
@@ -312,60 +319,60 @@ plot(trellis.last.object())
     \bm{y}_{ij} = \mu + \bm{b}_i + \bm{x}_{ij} + \bm{x}_{ij}^2 + \varepsilon_{ij}
     \]
   \item Mixed effect model that can be fit with \code{lme4}
-<<results=hide>>=    
+<<results=hide>>=
 library(lme4)
-fm.poly <- 
-    lmer(height ~ poly(age, 2) + (1 | Subject), 
+fm.poly <-
+    lmer(height ~ poly(age, 2) + (1 | Subject),
          data = Oxboys)
-@ 
+@
 % <<>>=
 % fm.poly
-% @ 
+% @
 
-  \item Goal: plot of data with fitted curve superposed 
+  \item Goal: plot of data with fitted curve superposed
   \end{itemize}
 
 
 
 
   % \subsection*{}
-<<echo=FALSE>>=  
-xyplot(height + fitted(fm.poly) ~ age | Subject, 
+<<echo=FALSE>>=
+xyplot(height + fitted(fm.poly) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
        type = c("p", "l"), distribute.type = TRUE,
        xlab = "Standardized age", ylab = "Height (cm)")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
 
   % \subsection*{}
-<<>>=  
-xyplot(height ~ age | Subject, 
+<<>>=
+xyplot(height ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy",
        type = "p", pch = 16,
        xlab = "Standardized age", ylab = "Height (cm)")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
 
   % \subsection*{}
-<<>>=  
-xyplot(fitted(fm.poly) ~ age | Subject, 
+<<>>=
+xyplot(fitted(fm.poly) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy",
        type = "l", lwd = 2,
        xlab = "Standardized age", ylab = "Height (cm)")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -373,22 +380,22 @@ plot(trellis.last.object())
 
 
   % \subsection*{}
-<<>>=  
+<<>>=
 xyplot(height + fitted(fm.poly) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16,
        lwd = 2, type = c("p", "l"), distribute.type = TRUE,
        xlab = "Standardized age", ylab = "Height (cm)")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
 
 <<echo=FALSE,results=hide>>=
 data(Gcsemv, package = "mlmRev")
-@ 
+@
 
 
 
@@ -407,16 +414,16 @@ data(Gcsemv, package = "mlmRev")
 
 
   % \subsection*{}
-<<>>=  
+<<>>=
 fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
-xyplot(written + fitted(fm) ~ course | gender, 
+xyplot(written + fitted(fm) ~ course | gender,
        data = subset(Gcsemv, !(is.na(written) | is.na(course))),
        type = c("p", "l"), distribute.type = TRUE)
 
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -425,13 +432,13 @@ plot(trellis.last.object())
   \begin{itemize}
   \item Built-in solution: Simple Linear Regression in each panel
   \end{itemize}
-<<>>=  
-xyplot(written ~ course | gender, Gcsemv, 
+<<>>=
+xyplot(written ~ course | gender, Gcsemv,
        type = c("p", "r"), col.line = "black")
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -464,17 +471,17 @@ fm2.pred <- cbind(grid, written = predict(fm2, newdata = grid))
 orig <- Gcsemv[c("course", "gender", "written")]
 
 combined <-
-    make.groups(original = orig, 
+    make.groups(original = orig,
                 fm0 = fm0.pred,
                 fm2 = fm2.pred)
 
 xyplot(written ~ course | gender, combined, groups = which,
        type = c("p", "l", "l"), distribute.type = TRUE)
 
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
@@ -491,14 +498,14 @@ grid <-
     expand.grid(course = do.breaks(course.rng, 30),
                 gender = unique(Gcsemv$gender))
 
-fm0.pred <- 
-    cbind(grid, 
+fm0.pred <-
+    cbind(grid,
           written = predict(fm0, newdata = grid))
-fm1.pred <- 
-    cbind(grid, 
+fm1.pred <-
+    cbind(grid,
           written = predict(fm1, newdata = grid))
-fm2.pred <- 
-    cbind(grid, 
+fm2.pred <-
+    cbind(grid,
           written = predict(fm2, newdata = grid))
 
 orig <- Gcsemv[c("course", "gender", "written")]
@@ -520,7 +527,7 @@ str(fm0.pred)
 <<>>=
 
 combined <-
-    make.groups(original = orig, 
+    make.groups(original = orig,
                 fm0 = fm0.pred,
                 fm2 = fm2.pred)
 
@@ -533,19 +540,19 @@ str(combined)
 
 
 <<>>=
-xyplot(written ~ course | gender, 
+xyplot(written ~ course | gender,
        data = combined, groups = which,
        type = c("p", "l", "l"), distribute.type = TRUE)
-@ 
+@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
-@ 
+@
 
 
 
 
 
-% 
+%
 %   \subsection*{}
 %   \begin{itemize}
 %   \item Generalizes to
@@ -554,7 +561,7 @@ plot(trellis.last.object())
 %     \item Non-linear models
 %     \end{itemize}
 %   \end{itemize}
-% 
+%
 
 
 
@@ -580,7 +587,7 @@ plot(trellis.last.object())
 
 <<echo=FALSE,results=tex>>=
 toLatex(sessionInfo())
-@ 
+@
 
 
 
