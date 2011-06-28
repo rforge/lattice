@@ -85,7 +85,7 @@ plot(trellis.last.object())
 @ 
 %
 Our objective will be to fit growth curves (possibly nonlinear) to the
-data and plot them along with the data.
+data and superpose them on the plot.
 \\
 
 ~~~~The second example is the \code{Gcsemv} dataset from the
@@ -121,9 +121,11 @@ panel functions.
 \\
 
 
-~~~~The idea of panel functions may seem intimidating to beginners, but
+\subsection*{Understanding panel functions}
+
+The idea of panel functions may seem intimidating to beginners, but
 actually they are quite simple.  As the name suggests, panel functions
-are simple \R\ functions (!).  They are responsible for drawing the
+are simply \R\ functions (!).  They are responsible for drawing the
 graphical content inside panels.  They get executed once for every
 panel, with the data specific to that panel supplied as arguments.
 Every high level function has a default panel function, e.g.,
@@ -138,10 +140,11 @@ xyplot(written ~ course | gender, data = Gcsemv,
 @ 
 %
 Here ``\code{panel.xyplot}'' is a (predefined) symbol whose value is a
-function.  To make things a little more complicated, but keep the
-results unchanged, we can explicitly define a new inline function,
-which simply calls \Rfunction{panel.xyplot} with exactly the arguments
-given to it.
+function.  But creating new functions is not at all difficult in \R.
+Making things a little more complicated, but keeping the results
+unchanged, we can explicitly define a new inline function, which
+simply calls \Rfunction{panel.xyplot} with exactly the arguments given
+to it.
 <<eval=FALSE>>=    
 xyplot(written ~ course | gender, data = Gcsemv, 
        xlab = "Coursework score", 
@@ -173,9 +176,12 @@ of doing anything with it (yet), we have simply called
 \Rfunction{panel.xyplot} with it.  Although the sequence of calls so
 far produce identical results, it is important to understand the
 concepts that have been introduced to appreciate the next example.
-\\
 
-~~~~Now that we have access to the data inside the inline panel function
+
+\subsection*{A nontrivial panel function}
+
+
+Now that we have access to the data inside the inline panel function
 we are defining, we can use it to add further elements to the plot.
 In the following, we add several elements: a reference grid (which
 does not really depend on the data), a loess fit, and marginal
@@ -194,6 +200,11 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @ 
 %
+Here the individual elements are added by the component functions
+\Rfunction{panel.grid}, \Rfunction{panel.loess}, \Rfunction{rug},
+etc., which all produce some form of graphical output, based on
+arguments supplied to it.  Together they define a \emph{procedure} for
+plotting the data in a panel, encapsulated in the ``panel function''.
 Notice that we also needed to include a call to
 \Rfunction{panel.xyplot}, as without it the raw data would not have
 been plotted.  Also notice that \Rfunction{panel.grid} is called
@@ -205,31 +216,70 @@ plot(trellis.last.object())
 @ 
 
 
-\subsection*{Panel functions}
+\subsection*{Passing arguments through \dots}
+
+We have used a \code{\dots} construct in all the panel functions
+defined above; it is now time to understand how it works.  The idea is
+fairly simple.  Functions normally have zero, one, or more named
+arguments.  It can also optionally have a special \code{\dots}
+argument.  When such a function is called, they can be supplied
+further arguments not matching the named arguments.  These arguments
+can then be passed on to other functions called by it, where it may
+match a named argument.  The first explicit use of an inline function
+above provides an example of this:
+<<eval=FALSE>>=
+       panel = function(...) {
+           panel.xyplot(...)
+       })
+@ 
+%
+The \code{panel} function is called with arguments named \code{x} and
+\code{y}.  Although \code{panel} itself does not recognize these
+names, it will dutifully pass them on to \Rfunction{panel.xyplot},
+which \emph{does} recognize them.
 
 
-Another useful feature: argument passing
-%   \begin{itemize}
-%   \item 
-%   \end{itemize}
+\subsection*{Simplifying the call}
+
+\Rfunction{panel.xyplot} has only two compulsory arguments (\code{x}
+and \code{y}), but it has quite a few optional arguments (with
+appropriate default values) which can modify its behaviour in various
+ways.  In particular, two of its arguments, \code{grid} and
+\code{type}, can be used to make it include a background grid and a
+fitted loess smooth respectively (see \code{help(panel.xyplot)} for
+details).  For example, we may write
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, 
-       panel = function(x, y, ...) {
-           panel.xyplot(x, y, ..., grid = TRUE,
+       panel = function(x, y) {
+           panel.xyplot(x, y, grid = TRUE,
                         type = c("p", "smooth"),
                         col.line = "black")
        })
 @ 
+%
+A useful observation is that this is equivalent to 
+<<>>=
+xyplot(written ~ course | gender, data = Gcsemv, 
+       grid = TRUE, type = c("p", "spline"), col.line = "black",
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+       })
+@ 
+%
+This is a consequence of how \Rfunction{xyplot} itself is designed; it
+has a \code{\dots} argument, and arguments that are not otherwise
+recognized by \Rfunction{xyplot} are passed on to the panel function.
+Notice how the panel function in the last plot is similar to our
+initial panel function examples that did nothing special.  
+
+
 is equivalent to 
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE, 
-       type = c("p", "smooth"), col.line = "black")
+       type = c("p", "spline"), col.line = "black")
 @ 
 
 
-
-
-  % \subsection*{}
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @ 
