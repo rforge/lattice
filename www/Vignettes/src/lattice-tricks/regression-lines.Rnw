@@ -198,7 +198,6 @@ xyplot(written ~ course | gender, data = Gcsemv,
            panel.rug(x = x[is.na(y)],
                      y = y[is.na(x)])
        })
-
 @
 %
 Here the individual elements are added by the component functions
@@ -242,7 +241,7 @@ names, it will dutifully pass them on to \Rfunction{panel.xyplot},
 which \emph{does} recognize them.
 
 
-\subsection*{Simplifying the call}
+\subsection*{Using optional features of predefined panel functions}
 
 \Rfunction{panel.xyplot} has only two compulsory arguments (\code{x}
 and \code{y}), but it has quite a few optional arguments (with
@@ -260,59 +259,58 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
+
+\subsection*{Simplifying the call}
+
+
 A useful observation is that this is equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv,
-       grid = TRUE, type = c("p", "spline"), col.line = "black",
+       grid = TRUE, type = c("p", "smooth"), col.line = "black",
        panel = function(x, y, ...) {
            panel.xyplot(x, y, ...)
        })
 @
 %
-This is a consequence of how \Rfunction{xyplot} itself is designed; it
-has a \code{\dots} argument, and arguments that are not otherwise
-recognized by \Rfunction{xyplot} are passed on to the panel function.
-Notice how the panel function in the last plot is similar to our
-initial panel function examples that did nothing special.  Following
-our arguments in the reverse direction, we now see that the above is equivalent to
+This is a consequence of how \Rfunction{xyplot} itself is designed.
+It has a \code{\dots} argument, which allows arbitrary additional
+arguments to be upplied to it.  Arguments that are not recognized by
+\Rfunction{xyplot} are passed on to the panel function.  Notice how
+the panel function in the last plot is similar to our initial panel
+function examples that did nothing special.  Following our arguments
+in reverse, we now see that the above is equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
-       type = c("p", "spline"), col.line = "black",
+       type = c("p", "smooth"), col.line = "black",
        panel = panel.xyplot)
 @
 %
 and hence also equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
-       type = c("p", "spline"), col.line = "black")
+       type = c("p", "smooth"), col.line = "black")
 @
 
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @
 
+The end result is thus produced by a call that looks quite simple, and
+is quite close to the plot produced using the complicated panel
+function above (except for the rugs).  Of course, this approach only
+works for features already supported by the default panel function
+(e.g., rugs are not supported by \Rfunction{panel.xyplot}, and thus
+require an explicit panel function), and requires knowledge of what
+features are available.  Still, most of the default panel functions
+(named as ``\code{panel.}'' followed by the high-level function name)
+do have optional arguments that implement the most common variants,
+making this a very useful approach.
 
 
 
+\section*{Back to regression lines}
 
-
-  \subsection*{Passing arguments to panel functions}
-  \begin{itemize}
-  \item Requires knowledge of arguments supported by panel function
-  \item Each high-level function has a corresponding \textit{default}
-    panel function, named as ``\code{panel.}'' followed by the
-    function name.  For example,
-    \begin{itemize}
-    \item \Rfunction{histogram} has panel function \code{panel.histogram}
-    \item \Rfunction{dotplot} has panel function \code{panel.dotplot}
-    \end{itemize}
-  \item Most have useful arguments that support common variants
-  \end{itemize}
-
-
-
-
-  \subsection*{Back to regression lines}
+  
   \begin{itemize}
   \item \code{Oxboys}: model height on age
     \[
@@ -419,7 +417,6 @@ fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
 xyplot(written + fitted(fm) ~ course | gender,
        data = subset(Gcsemv, !(is.na(written) | is.na(course))),
        type = c("p", "l"), distribute.type = TRUE)
-
 @
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
@@ -477,7 +474,6 @@ combined <-
 
 xyplot(written ~ course | gender, combined, groups = which,
        type = c("p", "l", "l"), distribute.type = TRUE)
-
 @
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
@@ -515,24 +511,20 @@ orig <- Gcsemv[c("course", "gender", "written")]
 
 
 <<>>=
-
 str(orig)
 str(fm0.pred)
-
 @
 
 
 
   % \subsection*{Approach: evaluate fits separately and combine}
 <<>>=
-
 combined <-
     make.groups(original = orig,
                 fm0 = fm0.pred,
                 fm2 = fm2.pred)
 
 str(combined)
-
 @
 
 
