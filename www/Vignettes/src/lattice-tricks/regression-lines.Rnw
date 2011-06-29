@@ -1,6 +1,6 @@
 \documentclass[10pt]{article}
 
-\title{Displaying Hello World model fits in Lattice plots}
+\title{Displaying model fits in Lattice plots}
 \author{Deepayan Sarkar}
 \date{}
 
@@ -68,9 +68,12 @@ package, which records the growth (height) over time of 26 boys from
 Oxford.  Each boy had his height measured on 9 occasions.
 <<>>=
 data(Oxboys, package = "nlme")
-head(Oxboys)
+head(Oxboys, 20)
 @
 %
+
+\newpage
+
 A simple Trellis plot of the data can be obtained by
 <<>>=
 xyplot(height ~ age | Subject, data = Oxboys,
@@ -88,7 +91,9 @@ Our objective will be to fit growth curves (possibly nonlinear) to the
 data and superpose them on the plot.
 \\
 
-~~~~The second example is the \code{Gcsemv} dataset from the
+\newpage
+
+The second example is the \code{Gcsemv} dataset from the
 \Rpackage{mlmRev} package. This dataset records the GCSE exam scores
 in a science subject for 1905 students.  The marks in two components
 (course work and written paper) are recorded separately.  We are
@@ -105,12 +110,12 @@ xyplot(written ~ course | gender, data = Gcsemv,
        xlab = "Coursework score",
        ylab = "Written exam score")
 @
-<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+<<echo=FALSE,fig=TRUE,width=9,height=5>>=
 plot(trellis.last.object())
 @
 
 
-
+\newpage
 
 \section*{Adding to a Lattice display}
 
@@ -177,6 +182,7 @@ of doing anything with it (yet), we have simply called
 far produce identical results, it is important to understand the
 concepts that have been introduced to appreciate the next example.
 
+\newpage
 
 \subsection*{A nontrivial panel function}
 
@@ -211,10 +217,11 @@ been plotted.  Also notice that \Rfunction{panel.grid} is called
 \emph{before} it, so that the grid is rendered \emph{below} the
 points.  Having the panel function control the display completely
 allows this kind of fine control.
-<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+<<echo=FALSE,fig=TRUE,width=9,height=5>>=
 plot(trellis.last.object())
 @
 
+\newpage
 
 \subsection*{Passing arguments through the \code{\dots} argument}
 
@@ -259,6 +266,12 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
+<<echo=FALSE,fig=TRUE,width=9,height=5>>=
+plot(trellis.last.object())
+@
+
+\newpage
+
 
 \subsection*{Simplifying the call}
 
@@ -274,11 +287,11 @@ xyplot(written ~ course | gender, data = Gcsemv,
 %
 This is a consequence of how \Rfunction{xyplot} itself is designed.
 It has a \code{\dots} argument, which allows arbitrary additional
-arguments to be upplied to it.  Arguments that are not recognized by
+arguments to be supplied to it.  Arguments that are not recognized by
 \Rfunction{xyplot} are passed on to the panel function.  Notice how
 the panel function in the last plot is similar to our initial panel
-function examples that did nothing special.  Following our arguments
-in reverse, we now see that the above is equivalent to
+function examples that did nothing special.  Following our earlier
+arguments in reverse, we now see that the above is equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
        type = c("p", "smooth"), col.line = "black",
@@ -291,10 +304,6 @@ xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
        type = c("p", "smooth"), col.line = "black")
 @
 
-<<echo=FALSE,fig=TRUE,width=9,height=6>>=
-plot(trellis.last.object())
-@
-
 The end result is thus produced by a call that looks quite simple, and
 is quite close to the plot produced using the complicated panel
 function above (except for the rugs).  Of course, this approach only
@@ -304,38 +313,110 @@ require an explicit panel function), and requires knowledge of what
 features are available.  Still, most of the default panel functions
 (named as ``\code{panel.}'' followed by the high-level function name)
 do have optional arguments that implement the most common variants,
-making this a very useful approach.
+making this a quite useful approach.
 
+
+\newpage
 
 
 \section*{Back to regression lines}
 
-  
-  \begin{itemize}
-  \item \code{Oxboys}: model height on age
-    \[
-    \bm{y}_{ij} = \mu + \bm{b}_i + \bm{x}_{ij} + \bm{x}_{ij}^2 + \varepsilon_{ij}
-    \]
-  \item Mixed effect model that can be fit with \code{lme4}
-<<results=hide>>=
+
+Returning to our original question of how to add model fits, let us
+next consider the \code{Oxboys} dataset.  We can of course add a loess
+smooth to each panel as before, but we wish to stick to parametric
+models for the remainder of this discussion.  The help page for
+\Rfunction{panel.xyplot} tells us that \code{type="l"} will add a
+linear regression line, so we can do
+
+<<>>=
+xyplot(height ~ age | Subject, data = Oxboys, strip = FALSE, 
+       aspect = "xy", pch = 16, col.line = "black",
+       grid = TRUE, type = c("p", "r"),
+       xlab = "Standardized age", ylab = "Height (cm)")
+@
+
+\vfill
+
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@
+%
+
+\newpage
+
+This does not seem completely appropriate though, as we expect growth
+curves to be nonlinear.  Without thinking too much about \emph{what}
+kind of nonlinearity would be appropriate, let us start out with a
+simple quadratic model.  We can no longer get away without a panel
+function, but we can use what we have already learned to come up with
+<<>>=
+xyplot(height ~ age | Subject, data = Oxboys, strip = FALSE, 
+       aspect = "xy", pch = 16, grid = TRUE, 
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+           fm <- lm(y ~ poly(x, 2))
+           panel.lines(x, fitted(fm), col.line = "black")
+       },
+       xlab = "Standardized age", ylab = "Height (cm)")
+@
+%
+The specific model used here is not important, and we can replace the
+call to \Rfunction{lm} inside the panel function with any other
+suitable modeling function, provided of course that the model fit uses
+only the data for that panel.
+
+\vfill
+
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@
+
+\newpage
+
+\subsection*{Moving from panel-specific to more general models}
+
+The approach taken so far is fundamentally limited in the sense that
+it can only handle models that are fitted using the within-panel data
+alone, because that is the only data available to the panel function.
+In practice, we are often interested in more complex approaches that
+model the full data.  To use such models in a \Rpackage{lattice} plot,
+it is simplest to fit the model separately, \emph{before} attempting
+to create the plot.
+\\
+
+~~~~Again, the particular model used is not important for our
+purposes.  For illustration, we will use a mixed effect model that
+generalizes the quadratic model used above, with common linear and
+quadratic coefficients, and a subject-specific random intercept.
+Formally, the model is given by 
+\[
+y_{ij} = \alpha_0 + b_i + \alpha_1 x_{ij} + \alpha_2 x_{ij}^2 + \varepsilon_{ij}
+\]
+where $i$ indexes subjects, $j$ indexes repeated measurements
+(occasion) of a subject, $x_{ij}$ denotes (standardized) age, and
+$y_{ij}$ denotes height.  The error terms $b_i$ and $\varepsilon_{ij}$
+are assumed to be independent, with $b_i \sim N(0, \tau^2)$ and $b_i
+\sim N(0, \sigma^2)$.  The parameters in the model are the
+coefficients $\alpha_i$ and the variance terms $\tau^2$ and
+$\sigma^2$.  The model that can be fit using the \code{lme4} package
+as follows.
+<<>>=
 library(lme4)
-fm.poly <-
-    lmer(height ~ poly(age, 2) + (1 | Subject),
-         data = Oxboys)
+fm.mixed <- lmer(height ~ age + I(age^2) + (1 | Subject), data = Oxboys)
+summary(fm.mixed)
 @
 % <<>>=
 % fm.poly
 % @
 
-  \item Goal: plot of data with fitted curve superposed
-  \end{itemize}
 
 
 
 
   % \subsection*{}
 <<echo=FALSE>>=
-xyplot(height + fitted(fm.poly) ~ age | Subject,
+xyplot(height + fitted(fm.mixed) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
        type = c("p", "l"), distribute.type = TRUE,
        xlab = "Standardized age", ylab = "Height (cm)")
@@ -363,7 +444,7 @@ plot(trellis.last.object())
 
   % \subsection*{}
 <<>>=
-xyplot(fitted(fm.poly) ~ age | Subject,
+xyplot(fitted(fm.mixed) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy",
        type = "l", lwd = 2,
        xlab = "Standardized age", ylab = "Height (cm)")
@@ -379,7 +460,7 @@ plot(trellis.last.object())
 
   % \subsection*{}
 <<>>=
-xyplot(height + fitted(fm.poly) ~ age | Subject,
+xyplot(height + fitted(fm.mixed) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16,
        lwd = 2, type = c("p", "l"), distribute.type = TRUE,
        xlab = "Standardized age", ylab = "Height (cm)")
