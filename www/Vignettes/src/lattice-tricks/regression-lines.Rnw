@@ -60,7 +60,10 @@ requirements.
 
 This document discusses the common situation where we want to augment
 a raw data plot with a model fit.  We will use two illustrative
-examples.
+examples.  We assume that the reader is familiar with the basic ideas
+related to model-fiting in \R, and in particular the use of
+\Rfunction{summary}, \Rfunction{fitted}, \Rfunction{predict}, and
+related methods.
 \\
 
 The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
@@ -217,6 +220,9 @@ been plotted.  Also notice that \Rfunction{panel.grid} is called
 \emph{before} it, so that the grid is rendered \emph{below} the
 points.  Having the panel function control the display completely
 allows this kind of fine control.
+
+\vfill
+
 <<echo=FALSE,fig=TRUE,width=9,height=5>>=
 plot(trellis.last.object())
 @
@@ -266,6 +272,9 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
+
+\vfill
+
 <<echo=FALSE,fig=TRUE,width=9,height=5>>=
 plot(trellis.last.object())
 @
@@ -399,22 +408,77 @@ $y_{ij}$ denotes height.  The error terms $b_i$ and $\varepsilon_{ij}$
 are assumed to be independent, with $b_i \sim N(0, \tau^2)$ and $b_i
 \sim N(0, \sigma^2)$.  The parameters in the model are the
 coefficients $\alpha_i$ and the variance terms $\tau^2$ and
-$\sigma^2$.  The model that can be fit using the \code{lme4} package
-as follows.
+$\sigma^2$.  The model can be fit using the \code{lme4} package as
+follows.
 <<>>=
 library(lme4)
 fm.mixed <- lmer(height ~ age + I(age^2) + (1 | Subject), data = Oxboys)
+@
+%
+We might now proceed to view the estimates of the parameters and
+related numerical quantities; for example, using
+<<>>=
 summary(fm.mixed)
 @
-% <<>>=
-% fm.poly
-% @
+%
+However, our goal is simply to visually incorporate the fitted model
+in the plot, and all we need for that is the \Rfunction{fitted} and
+\Rfunction{predict} (which are closely related) methods for the
+particular modeling method used.  The \Rfunction{fitted} function
+returns the fitted values for the \emph{same} data that have been used
+to fir the model.  The \Rfunction{predict} function can be used to
+obtain the predicted values for a \emph{new} set of inputs.  If no new
+data is provided, \Rfunction{predict} essentially behaves like
+\Rfunction{fitted}.
+
+\newpage
 
 
+\subsection*{Fitted models in panel functions}
+
+We now have the fitted model object \code{fm.mixed}, and we wish to
+plot the fitted regression curve in each panel.  Two approaches are
+possible.  We can make the fitted model available to the panel
+function, and then use it as needed.  Alternatively, we can augment
+our dataset with the necessary information \emph{before} plotting
+anything.  We start with the first approach.
+\\
+
+~~~~We already know how to make the fitted model available to the
+panel function: pass it in as an argument not recognized by
+\Rfunction{xyplot}, and it will be passed on to the panel function.
+Thus, we have
+
+<<>>=
+xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
+       strip = FALSE, aspect = "xy", pch = 16, grid = TRUE,
+       panel = function(x, y, ..., fit) {
+           panel.xyplot(x, y, ...)
+           subj.coef <- coef(fit)$Subject[packet.number(), ]
+           ypred <- with(subj.coef, 
+                         `(Intercept)` + `age` * x + `I(age^2)` * x^2)
+           panel.lines(x, ypred, col = "black")
+       },
+       xlab = "Standardized age", ylab = "Height (cm)")
+@
+
+\vfill
+
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@
+
+\newpage
+
+However, this seems unnecessarily complicated.  Partly this is due to
+the use of the \Rfunction{lmer} function: as its fitted models do not
+have a \Rfunction{predict} method (for legitimate reasons), we had to
+manually construct the predictions using the result of
+\Rfunction{coef}.  In general, for multipanel plots the current panel
+will represent some subset of the full dataset, and we would need to
+somehow figure out the relevant 
 
 
-
-  % \subsection*{}
 <<echo=FALSE>>=
 xyplot(height + fitted(fm.mixed) ~ age | Subject,
        data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
