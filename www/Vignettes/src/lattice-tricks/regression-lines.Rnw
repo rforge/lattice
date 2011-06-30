@@ -461,6 +461,66 @@ xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
        },
        xlab = "Standardized age", ylab = "Height (cm)")
 @
+%
+However, this seems unnecessarily complicated.  Partly this is due to
+the use of the \Rfunction{lmer} function: as its fitted models do not
+have a \Rfunction{predict} method (for legitimate reasons), we had to
+manually construct the predictions using the result of
+\Rfunction{coef}.  In general, for multipanel plots the current panel
+will represent some subset of the full dataset, and we would need to
+somehow figure out the relevant part of the model.  Here, for example,
+we needed to figure out (inside the panel function) which
+\code{Subject} was represented in the panel.
+
+\vfill
+
+<<echo=FALSE,fig=TRUE,width=9,height=6>>=
+plot(trellis.last.object())
+@
+
+
+\newpage
+
+One simpler but fairly general approach works well in this and many
+other situations.  Consider the following example, which produces
+identical output.
+<<>>=
+xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
+       strip = FALSE, aspect = "xy", pch = 16, grid = TRUE,
+       panel = function(x, y, ..., fit, subscripts) {
+           panel.xyplot(x, y, ...)
+           ypred <- fitted(fit)[subscripts]
+           panel.lines(x, ypred, col = "black")
+       },
+       xlab = "Standardized age", ylab = "Height (cm)")
+@
+%
+This makes use of two features.  First, the \Rfunction{fitted} method
+extracts the fitted values from the model object.  This of course
+corresponds to the full dataset, and is not specific to the panel; it
+will be a vector with the same length as the number of observation
+used to fit the model, and will be identical for each panel.  The
+second piece is the \code{subscripts} argument, which
+\Rpackage{lattice} passes to the panel function, containing the
+indices of the observations in the original dataset that end up in the
+panel.  This is used to extract the corresponding elements of
+\code{fitted(fit)}.
+\\
+
+% <<echo=FALSE,fig=TRUE,width=9,height=6>>=
+% plot(trellis.last.object())
+% @
+
+% \newpage
+
+
+~~~~An interesting corollary of this approach is the following trick.
+<<>>=
+xyplot(height + fitted(fm.mixed) ~ age | Subject, data = Oxboys, 
+       strip = FALSE, aspect = "xy", pch = 16, grid = TRUE,
+       type = c("p", "l"), distribute.type = TRUE,
+       xlab = "Standardized age", ylab = "Height (cm)")
+@
 
 \vfill
 
@@ -469,26 +529,6 @@ plot(trellis.last.object())
 @
 
 \newpage
-
-However, this seems unnecessarily complicated.  Partly this is due to
-the use of the \Rfunction{lmer} function: as its fitted models do not
-have a \Rfunction{predict} method (for legitimate reasons), we had to
-manually construct the predictions using the result of
-\Rfunction{coef}.  In general, for multipanel plots the current panel
-will represent some subset of the full dataset, and we would need to
-somehow figure out the relevant 
-
-
-<<echo=FALSE>>=
-xyplot(height + fitted(fm.mixed) ~ age | Subject,
-       data = Oxboys, strip = FALSE, aspect = "xy", pch = 16, lwd = 2,
-       type = c("p", "l"), distribute.type = TRUE,
-       xlab = "Standardized age", ylab = "Height (cm)")
-@
-<<echo=FALSE,fig=TRUE,width=9,height=6>>=
-plot(trellis.last.object())
-@
-
 
 
 
