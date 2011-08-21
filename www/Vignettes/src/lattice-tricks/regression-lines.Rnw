@@ -59,11 +59,11 @@ requirements.
 \\
 
 This document discusses the common situation where we want to augment
-a raw data plot with a model fit.  We will use two illustrative
-examples.  We assume that the reader is familiar with the basic ideas
-related to model-fiting in \R, and in particular the use of
-\Rfunction{summary}, \Rfunction{fitted}, \Rfunction{predict}, and
-related methods.
+a raw data plot with a model fit.  We assume that the reader is
+familiar with the basic ideas related to model-fiting in \R, and in
+particular the use of \Rfunction{summary}, \Rfunction{fitted},
+\Rfunction{predict}, and related methods.  We use two datasets for our
+examples.
 \\
 
 The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
@@ -217,9 +217,10 @@ output, based on arguments supplied to it.  Together they define a
 ``panel function''.  Notice that we also needed to include a call to
 \Rfunction{panel.xyplot}, as without it the raw data would not have
 been plotted.  Also notice that \Rfunction{panel.grid} is called
-\emph{before} it, so that the grid is rendered \emph{below} the
-points.  Having the panel function control the display completely
-allows this kind of fine control.
+\emph{before} it, but \Rfunction{panel.loess} \emph{after}, so that
+the grid is rendered \emph{below} the points but the loess fit
+\emph{above}.  Having the panel function control the display
+completely allows this kind of fine control.
 
 \vfill
 
@@ -405,9 +406,9 @@ y_{ij} = \alpha_0 + b_i + \alpha_1 x_{ij} + \alpha_2 x_{ij}^2 + \varepsilon_{ij}
 where $i$ indexes subjects, $j$ indexes repeated measurements
 (occasion) of a subject, $x_{ij}$ denotes (standardized) age, and
 $y_{ij}$ denotes height.  The error terms $b_i$ and $\varepsilon_{ij}$
-are assumed to be independent, with $b_i \sim N(0, \tau^2)$ and $b_i
-\sim N(0, \sigma^2)$.  The parameters in the model are the
-coefficients $\alpha_i$ and the variance terms $\tau^2$ and
+are assumed to be independent, with $b_i \sim N(0, \tau^2)$ and
+$\varepsilon_{ij} \sim N(0, \sigma^2)$.  The parameters in the model
+are the coefficients $\alpha_i$ and the variance terms $\tau^2$ and
 $\sigma^2$.  The model can be fit using the \code{lme4} package as
 follows.
 <<>>=
@@ -426,7 +427,7 @@ in the plot, and all we need for that is the \Rfunction{fitted} and
 \Rfunction{predict} (which are closely related) methods for the
 particular modeling method used.  The \Rfunction{fitted} function
 returns the fitted values for the \emph{same} data that have been used
-to fir the model.  The \Rfunction{predict} function can be used to
+to fit the model.  The \Rfunction{predict} function can be used to
 obtain the predicted values for a \emph{new} set of inputs.  If no new
 data is provided, \Rfunction{predict} essentially behaves like
 \Rfunction{fitted}.
@@ -466,12 +467,11 @@ However, this seems unnecessarily complicated.  Partly this is due to
 the use of the \Rfunction{lmer} function: as its fitted models do not
 have a \Rfunction{predict} method (for legitimate reasons), we had to
 manually construct the predictions using the result of
-\Rfunction{coef}.  More generally, for multipanel plots the current
-panel will represent some subset of the full dataset, and we would
-need to somehow figure out (inside the panel function) the
-corresponding sub-part of the model to plot.  For example, here we
-needed to figure out which \code{Subject} was represented in the
-panel.
+\Rfunction{coef}.  In general, for multipanel plots the current panel
+will represent some subset of the full dataset, and we would need to
+somehow figure out the relevant part of the model.  Here, for example,
+we needed to figure out (inside the panel function) which
+\code{Subject} was represented in the panel.
 
 \vfill
 
@@ -505,9 +505,7 @@ second piece is the \code{subscripts} argument, which
 \Rpackage{lattice} passes to the panel function, containing the
 indices of the observations in the original dataset that end up in the
 panel.  This is used to extract the corresponding elements of
-\code{fitted(fit)}.  This approach works for all modeling functions
-that support a \Rfunction{fitted} method, although one should be
-careful to check how \code{NA} values are handled.
+\code{fitted(fit)}.
 \\
 
 % <<echo=FALSE,fig=TRUE,width=9,height=6>>=
@@ -525,8 +523,11 @@ xyplot(height + fitted(fm.mixed) ~ age | Subject, data = Oxboys,
        xlab = "Standardized age", ylab = "Height (cm)")
 @
 %
-We leave to the reader as an exercise the task of figuring out why
-this works (Hint: see \code{help(panel.superpose)}).
+Except for the color of the line, the output is essentially identical.
+This treats the fitted values as an additional set of \code{y} values,
+and plots them with lines rather than points.  See
+\code{help(panel.superpose)} for an explanation of the
+\code{distribute.type} argument.
 
 \vfill
 
@@ -536,196 +537,142 @@ plot(trellis.last.object())
 
 \newpage
 
-\subsection*{GCSE exam scores revisited}
+\section*{Irregular data}
 
-Trying the same approach with the \code{Gcsemv} data unfortunately
-fails (even after we account for a length mismatch between the results
-of \Rfunction{fitted} and the original data due to missingness).
+Unfortunately, this approach does not work in all situations.  For
+example, in the \code{Gcsemv} example, we might try the following.
+
 <<>>=
-fm <- lm(written ~ course + I(course^2) + gender, Gcsemv)
-xyplot(written ~ course | gender,
-       data = subset(Gcsemv, !(is.na(written) | is.na(course))),
-       fit = fm,
-       panel = function(x, y, ..., fit, subscripts) {
-           panel.xyplot(x, y, ...)
-           ypred <- fitted(fit)[subscripts]
-           panel.lines(x, ypred, col = "black")
-       })
+fm <- lm(written ~ course + I(course^2) + gender, Gcsemv, na.action = na.exclude)
+xyplot(written + fitted(fm) ~ course | gender, data = Gcsemv,
+       type = c("p", "l"), distribute.type = TRUE)
 @
+%
+~~~~We need the \code{na.exclude} argument is needed as otherwise
+missing values are omitted from \code{fitted(fm)}, making its length
+different from that of the other variables.  However, as we can see
+below, the result is a mess because the $x$ values are not ordered
+(and there are too many of them as well).
 
 \vfill
 
-<<echo=FALSE,fig=TRUE,width=9,height=5>>=
-plot(trellis.last.object())
-@
-%
-This happens because unlike in the previous example, the $x$ values
-are not ordered within each panel.  Even if we could take care of that
-problem, the $x$ are not equispaced, and are in fact much more densely
-packed in certain regions than necessary.
-
-\newpage
-
-
-As before, we could use a built-in model supported by
-\Rfunction{panel.xyplot}, such as
-<<>>=
-xyplot(written ~ course | gender, Gcsemv, type = c("p", "r"), col.line = "black")
-@
-<<echo=FALSE,fig=TRUE,width=9,height=4.5>>=
-plot(trellis.last.object())
-@
-%
-or the more complicated (but still restricted to use within-panel data)
-<<>>=
-xyplot(written ~ course | gender, data = Gcsemv,
-       panel = function(x, y, ...) {
-           fm <- lm(y ~ x + I(x^2))
-           panel.xyplot(x, y, ...)
-           xx <- do.breaks(range(x, finite = TRUE), 100)
-           panel.lines(xx, predict(fm, list(x = xx)), col = "black")
-       })
-@
-%
-<<echo=FALSE,fig=TRUE,width=9,height=4.5>>=
-plot(trellis.last.object())
-@
-
-\newpage
-
-
-More complex models need a little more work.  Let us Consider the
-following three models.
-<<>>=
-fm0 <- lm(written ~ course, Gcsemv)
-fm1 <- lm(written ~ course + gender, Gcsemv)
-fm2 <- lm(written ~ course * gender, Gcsemv)
-@
-%
-Our goal is to compare \code{fm2} and \code{fm1} (which incorporate
-\code{gender} as a factor first additively and then as an interction)
-with \code{fm0}.  
-
-
-
-<<echo=FALSE>>=
-
-grid <-
-    expand.grid(course = do.breaks(range(Gcsemv$course, finite = TRUE), 30),
-                gender = unique(Gcsemv$gender))
-
-fm0.pred <- cbind(grid, written = predict(fm0, newdata = grid))
-fm1.pred <- cbind(grid, written = predict(fm1, newdata = grid))
-fm2.pred <- cbind(grid, written = predict(fm2, newdata = grid))
-
-orig <- Gcsemv[c("course", "gender", "written")]
-
-combined <-
-    make.groups(original = orig,
-                fm0 = fm0.pred,
-                fm2 = fm2.pred)
-
-xyplot(written ~ course | gender, combined, groups = which,
-       type = c("p", "l", "l"), distribute.type = TRUE)
-@
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @
 
 
+\newpage
 
-
-
-  %% \subsection*{One Approach}
-  \begin{itemize}
-  \item Solution: evaluate fits separately and combine
-  %% \item Generalizes to more models, other types of models
+We can of course always stick to the built in solutions; for example,
+<<eval=FALSE>>=
+xyplot(written ~ course | gender, Gcsemv,
+       type = c("p", "r"), col.line = "black")
+@ 
+%
+However, more complex models need more work.  Consider the three
+models
 <<>>=
+fm0 <- lm(written ~ poly(course, 2), 
+          data = subset(Gcsemv, !(is.na(written) | is.na(course))))
+fm1 <- update(fm0, written ~ poly(course, 2) + gender)
+fm2 <- update(fm0, written ~ poly(course, 2) * gender)
+@
+%
+The first model is a quadratic regression model that ignores gender.
+The second model incorporates gender as an additive term, and the
+third model further includes interaction terms.  Here we have used the
+``non-missing'' subset of \code{Gcsemv} in \code{fm0} to avoid further
+grief related to missing values, and used the \Rfunction{update}
+function to simplify the subsequent model fitting calls.  Our goal is
+to compare the fits from \code{fm2} and \code{fm1} with that from
+\code{fm0}.
 
+
+~~~~All we really need are the fitted values at a sufficiently dense
+grid covering the range of the predictors.  Our approach will be to
+compute these values separately and then combine them suitably before
+plotting.  This approach generalizes to more models, as well as other
+types of models.  We first define a suitable evaluation grid.
+<<>>=
 course.rng <- range(Gcsemv$course, finite = TRUE)
 grid <-
     expand.grid(course = do.breaks(course.rng, 30),
                 gender = unique(Gcsemv$gender))
-
-fm0.pred <-
-    cbind(grid,
-          written = predict(fm0, newdata = grid))
-fm1.pred <-
-    cbind(grid,
-          written = predict(fm1, newdata = grid))
-fm2.pred <-
-    cbind(grid,
-          written = predict(fm2, newdata = grid))
-
-orig <- Gcsemv[c("course", "gender", "written")]
-@
-  \end{itemize}
-
-
-
+@ 
+%
+Next we evaluate the fitted values for each of the three models.
 <<>>=
-str(orig)
+fm0.pred <- cbind(grid, written = predict(fm0, newdata = grid))
+fm1.pred <- cbind(grid, written = predict(fm1, newdata = grid))
+fm2.pred <- cbind(grid, written = predict(fm2, newdata = grid))
+@
+%
+
+Notice that we have done this in a way that each set of predictions
+comes in the form of a data frame with columns \code{course},
+\code{gender}, and \code{written}.
+<<>>=
 str(fm0.pred)
-@
-
-
-
-  % \subsection*{Approach: evaluate fits separately and combine}
+@ 
+%
+We will now transform our original dataset to have the same form.
 <<>>=
-combined <-
-    make.groups(original = orig,
-                fm0 = fm0.pred,
-                fm2 = fm2.pred)
-
-str(combined)
+orig <- Gcsemv[c("course", "gender", "written")]
+str(orig)
+@
+%
+and then combine it with the predictions from the models we wish to
+compare.
+<<>>=
+combined <- make.groups(original = orig, fm0 = fm0.pred, fm2 = fm2.pred)
 @
 
+\newpage
 
-
-
-
+The \Rfunction{make.groups} function combines similarly structured
+datasets (or simple atomic vectors) with possibly different number of
+observations into a single dataset, adding a new variable to indicate
+the origin of each observation in the new dataset.
+<<>>=
+str(combined)
+@ 
+%
+The \code{combined} dataset thus consists of the original raw
+observations (\code{orig}), and evaluations of the fitted models
+\code{fm0} and \code{fm2}.  All this manipulation finally leads to the
+call that produces the plot we want.
 <<>>=
 xyplot(written ~ course | gender,
        data = combined, groups = which,
        type = c("p", "l", "l"), distribute.type = TRUE)
 @
+%
+The raw data are plotted as points, whereas the model fit evaluations
+are joined by lines to produce a representation of the fitted curves.
+
+\vfill
+
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @
 
 
+\newpage
+
+\subsection*{Summary}
 
 
+The take home message from all this is that custom panel functions
+provide finest level of control, but built-in panel functions are also
+powerful because we can take specify their arguments using argument
+passing.  However, this requires knowledge of arguments (so read
+documentation!).  
 
-%
-%   \subsection*{}
-%   \begin{itemize}
-%   \item Generalizes to
-%     \begin{itemize}
-%     \item More than two fitted models
-%     \item Non-linear models
-%     \end{itemize}
-%   \end{itemize}
-%
-
-
-
-\subsection{Summary}
-
-
-\paragraph{Take home message}
-\begin{itemize}
-\item Panel functions provide finest level of control
-\item Often modeling and data manipulation should be done prior to
-  plotting step.
-\item Built-in panel functions are also powerful
-  \begin{itemize}
-  \item Easily taken advantage of using argument passing
-  \item Requires knowledge of arguments (read documentation!)
-  \item Special function \Rfunction{panel.superpose} useful for
-    grouping
-  \end{itemize}
-\end{itemize}
+~~~For adding regression lines from complex models, it is usually more
+convenient to obtain a suitable representation of the relevant data
+\emph{before} the plotting is done.  The special function
+\Rfunction{panel.superpose} useful for grouping, and in particular the
+\code{distribute.type} argument is useful when adding model fits.
 
 
 
