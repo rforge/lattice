@@ -50,15 +50,15 @@ options(width = 70,
 
 
 
-\lattice\ is an add-on package that implements Trellis graphics
-(originally developed for \textsf{S} and \textsf{S-PLUS}) in \R.  It
-is a powerful and elegant high-level data visualization system, with
-an emphasis on multivariate data, that is sufficient for typical
+\lattice\ is an add-on package for \R\ that implements Trellis
+graphics (originally developed for \textsf{S} and \textsf{S-PLUS}).
+It is a powerful and elegant high-level data visualization system,
+with an emphasis on multivariate data, that is sufficient for typical
 graphics needs, and is also flexible enough to handle most nonstandard
 requirements.
 \\
 
-This document discusses the common situation where we want to augment
+~~~~This article discusses the common situation where we want to augment
 a raw data plot with a model fit.  We assume that the reader is
 familiar with the basic ideas related to model-fiting in \R, and in
 particular the use of \Rfunction{summary}, \Rfunction{fitted},
@@ -66,7 +66,7 @@ particular the use of \Rfunction{summary}, \Rfunction{fitted},
 examples.
 \\
 
-The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
+~~~~The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
 package, which records the growth (height) over time of 26 boys from
 Oxford.  Each boy had his height measured on 9 occasions.
 <<>>=
@@ -92,7 +92,7 @@ plot(trellis.last.object())
 %
 Our objective will be to fit growth curves (possibly nonlinear) to the
 data and superpose them on the plot.
-\\
+
 
 \newpage
 
@@ -126,7 +126,6 @@ In both examples, we wish to add to the basic plot of the raw data.
 In traditional \R\ graphics, one is encouraged to incrementally add
 components to a plot.  The analogue in Lattice graphics is to write
 panel functions.
-\\
 
 
 \subsection*{Understanding panel functions}
@@ -152,7 +151,8 @@ function.  But creating new functions is not at all difficult in \R.
 Making things a little more complicated, but keeping the results
 unchanged, we can explicitly define a new inline function, which
 simply calls \Rfunction{panel.xyplot} with exactly the arguments given
-to it.
+to it.\footnote{The mysterious \code{\dots} needs some explanation,
+  which we will get to soon. }
 <<eval=FALSE>>=
 xyplot(written ~ course | gender, data = Gcsemv,
        xlab = "Coursework score",
@@ -219,8 +219,8 @@ output, based on arguments supplied to it.  Together they define a
 been plotted.  Also notice that \Rfunction{panel.grid} is called
 \emph{before} it, but \Rfunction{panel.loess} \emph{after}, so that
 the grid is rendered \emph{below} the points but the loess fit
-\emph{above}.  Having the panel function control the display
-completely allows this kind of fine control.
+\emph{above}.  Having the panel function completely control the
+display allows this kind of fine control.
 
 \vfill
 
@@ -313,7 +313,7 @@ and hence also equivalent to
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
        type = c("p", "smooth"), col.line = "black")
 @
-
+%
 The end result is thus produced by a call that looks quite simple, and
 is quite close to the plot produced using the complicated panel
 function above (except for the rugs).  Of course, this approach only
@@ -336,7 +336,7 @@ Returning to our original question of how to add model fits, let us
 next consider the \code{Oxboys} dataset.  We can of course add a loess
 smooth to each panel as before, but we wish to stick to parametric
 models for the remainder of this discussion.  The help page for
-\Rfunction{panel.xyplot} tells us that \code{type="l"} will add a
+\Rfunction{panel.xyplot} tells us that \code{type="r"} will add a
 linear regression line, so we can do
 
 <<>>=
@@ -374,7 +374,10 @@ xyplot(height ~ age | Subject, data = Oxboys, strip = FALSE,
 The specific model used here is not important, and we can replace the
 call to \Rfunction{lm} inside the panel function with any other
 suitable modeling function, provided of course that the model fit uses
-only the data for that panel.
+only the data for that panel.  The \Rfunction{panel.lines} call draws
+lines joining its arguments (in the order provided), producing a
+reasonable approximation of the quadratic curve that we actually want
+to represent.
 
 \vfill
 
@@ -548,11 +551,11 @@ xyplot(written + fitted(fm) ~ course | gender, data = Gcsemv,
        type = c("p", "l"), distribute.type = TRUE)
 @
 %
-~~~~We need the \code{na.exclude} argument is needed as otherwise
-missing values are omitted from \code{fitted(fm)}, making its length
-different from that of the other variables.  However, as we can see
-below, the result is a mess because the $x$ values are not ordered
-(and there are too many of them as well).
+The \code{na.exclude} argument is needed, as otherwise missing values
+are omitted from \code{fitted(fm)} making its length different from
+that of the other variables.  However, as we can see below, the result
+is a mess because the $x$ values are not ordered (and there are too
+many of them as well).
 
 \vfill
 
@@ -563,7 +566,7 @@ plot(trellis.last.object())
 
 \newpage
 
-We can of course always stick to the built in solutions; for example,
+We can of course always stick to the built-in solutions; for example,
 <<eval=FALSE>>=
 xyplot(written ~ course | gender, Gcsemv,
        type = c("p", "r"), col.line = "black")
@@ -600,7 +603,7 @@ grid <-
                 gender = unique(Gcsemv$gender))
 @ 
 %
-Next we evaluate the fitted values for each of the three models.
+Next we evaluate the corresponding fitted values for each of the three models.
 <<>>=
 fm0.pred <- cbind(grid, written = predict(fm0, newdata = grid))
 fm1.pred <- cbind(grid, written = predict(fm1, newdata = grid))
@@ -650,6 +653,9 @@ xyplot(written ~ course | gender,
 The raw data are plotted as points, whereas the model fit evaluations
 are joined by lines to produce a representation of the fitted curves.
 
+~~~~A similar comparison of \code{fm0} and \code{fm1} is left a an
+exercise.
+
 \vfill
 
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
@@ -662,17 +668,17 @@ plot(trellis.last.object())
 \subsection*{Summary}
 
 
-The take home message from all this is that custom panel functions
+The take-home message from all this is that custom panel functions
 provide finest level of control, but built-in panel functions are also
 powerful because we can take specify their arguments using argument
 passing.  However, this requires knowledge of arguments (so read
 documentation!).  
 
-~~~For adding regression lines from complex models, it is usually more
-convenient to obtain a suitable representation of the relevant data
-\emph{before} the plotting is done.  The special function
-\Rfunction{panel.superpose} useful for grouping, and in particular the
-\code{distribute.type} argument is useful when adding model fits.
+~~~For adding regression lines from complex models, it is usually best
+to obtain a suitable representation of the relevant data \emph{before}
+the plotting is done.  The special function
+\Rfunction{panel.superpose} is useful for grouping, and in particular
+the \code{distribute.type} argument is useful when adding model fits.
 
 
 
