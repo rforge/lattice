@@ -50,7 +50,7 @@ options(width = 70,
 
 
 
-\lattice\ is an add-on package for \R\ that implements Trellis
+The \lattice\ add-on package for \R\ is an implementation of Trellis
 graphics (originally developed for \textsf{S} and \textsf{S-PLUS}).
 It is a powerful and elegant high-level data visualization system,
 with an emphasis on multivariate data, that is sufficient for typical
@@ -58,17 +58,20 @@ graphics needs, and is also flexible enough to handle most nonstandard
 requirements.
 \\
 
-~~~~This article discusses the common situation where we want to augment
-a raw data plot with a model fit.  We assume that the reader is
-familiar with the basic ideas related to model-fiting in \R, and in
-particular the use of \Rfunction{summary}, \Rfunction{fitted},
-\Rfunction{predict}, and related methods.  We use two datasets for our
-examples.
+~~~~This article discusses a situation many of us often find ourselves
+in, where we want to augment a raw data plot with a model fit.  We
+restrict our attention to regression models, that is, models where the
+response variable is continuous.  We assume that the reader has a
+basic familiarity with model-fitting in \R\ (including the
+formula-based modeling language) and the use of \Rfunction{summary},
+\Rfunction{fitted}, \Rfunction{predict}, and related methods.  We also
+assume basic familiarity with \lattice{}.
 \\
 
-~~~~The first one is the \code{Oxboys} dataset from the \Rpackage{nlme}
-package, which records the growth (height) over time of 26 boys from
-Oxford.  Each boy had his height measured on 9 occasions.
+~~~~We use two datasets for our examples.  The first one is the
+\code{Oxboys} dataset from the \Rpackage{nlme} package, which records
+the growth (height) over time of 26 boys from Oxford.  Each boy had
+his height measured on 9 occasions.
 <<>>=
 data(Oxboys, package = "nlme")
 head(Oxboys, 20)
@@ -85,13 +88,14 @@ xyplot(height ~ age | Subject, data = Oxboys,
 @
 %
 Each panel represents one subject.  As the subject identifiers are
-uninformative, the usual strips on top of each panel is omitted.
+uninformative, the usual strips on top of each panel has been omitted.
+Our objective will be to fit growth curves (possibly nonlinear) to the
+data and superpose them on the plot.
+\vfill
 <<echo=FALSE,fig=TRUE,width=9,height=6>>=
 plot(trellis.last.object())
 @
 %
-Our objective will be to fit growth curves (possibly nonlinear) to the
-data and superpose them on the plot.
 
 
 \newpage
@@ -113,6 +117,9 @@ xyplot(written ~ course | gender, data = Gcsemv,
        xlab = "Coursework score",
        ylab = "Written exam score")
 @
+
+\vfill
+
 <<echo=FALSE,fig=TRUE,width=9,height=5>>=
 plot(trellis.last.object())
 @
@@ -123,21 +130,30 @@ plot(trellis.last.object())
 \section*{Adding to a Lattice display}
 
 In both examples, we wish to add to the basic plot of the raw data.
-In traditional \R\ graphics, one is encouraged to incrementally add
-components to a plot.  The analogue in Lattice graphics is to write
-panel functions.
+In traditional \R\ graphics, one usually adds components to a plot
+incrementally, using ``low-level'' functions such as
+\Rfunction{lines}.  The analogue in Lattice graphics is to write
+\emph{panel functions}.
 
 
 \subsection*{Understanding panel functions}
 
-The idea of panel functions may seem intimidating to beginners, but
-actually they are quite simple.  As the name suggests, panel functions
-are simply \R\ functions (!).  They are responsible for drawing the
-graphical content inside panels.  They get executed once for every
-panel, with the data specific to that panel supplied as arguments.
-Every high level function has a default panel function, e.g.,
+The idea of panel functions often intimidate beginners, but it is
+actually quite simple.  As the name suggests, panel functions are
+simply \R\ functions (!).  They play a central role in \lattice\
+because they are responsible for actually drawing the graphical
+content of panels.  Each \lattice\ plot has a panel function.  This
+function gets executed every time a panel is drawn, with the data
+specific to that panel supplied as arguments.  As the input data is
+different for each panel, so is the result.
+\\
+
+~~~~Every high level function has a default panel function, e.g.,
 \Rfunction{xyplot} has default panel function
-\Rfunction{panel.xyplot}.  Thus, the code that produced the GCSE score
+\Rfunction{panel.xyplot}.  When creating a \lattice\ plot, one can
+replace this default by one's own choice by specifying a \code{panel}
+argument.  The default panel function is of course a valid (though
+uninteresting) choice, and thus, the code that produced the GCSE score
 plot above is equivalent to
 <<eval=FALSE>>=
 xyplot(written ~ course | gender, data = Gcsemv,
@@ -146,13 +162,12 @@ xyplot(written ~ course | gender, data = Gcsemv,
        panel = panel.xyplot)
 @
 %
-Here ``\code{panel.xyplot}'' is a (predefined) symbol whose value is a
-function.  But creating new functions is not at all difficult in \R.
-Making things a little more complicated, but keeping the results
-unchanged, we can explicitly define a new inline function, which
-simply calls \Rfunction{panel.xyplot} with exactly the arguments given
-to it.\footnote{The mysterious \code{\dots} needs some explanation,
-  which we will get to soon. }
+Here ``\code{panel.xyplot}'' is a predefined function.  But creating
+new functions is not at all difficult in \R.  Here we explicitly
+define a new inline function, which simply calls
+\Rfunction{panel.xyplot} with exactly the arguments given to
+it.\footnote{The mysterious \code{\dots} requires some explanation, which
+  we will get to soon. }
 <<eval=FALSE>>=
 xyplot(written ~ course | gender, data = Gcsemv,
        xlab = "Coursework score",
@@ -162,14 +177,21 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
-Now, to do anything interesting with the data, we need to get access
-to the raw data for each panel.  For each high-level
-\Rpackage{lattice} function, such as \Rfunction{xyplot}, the raw data
-is passed to the panel function as specific arguments (which may
-depend on the high-level function).  Looking at the help page for
-\Rfunction{panel.xyplot} tells us that for our example these arguments
-are \code{x} and \code{y}.  Thus, another equivalent way to create the
-plot above is
+Even if it is not completely clear what is going on here, it should
+not be difficult to believe (or to check) that while things look a
+little more complicated, the results remain unchanged.
+\\
+
+
+~~~~Now, as we remarked earlier, panels look different because the
+data that goes into the panel function each time it is executed is
+different.  To do anything interesting, we need to get access to this
+data.  The specific arguments that are used to pass data to the panel
+function depends on the specific high-level \Rpackage{lattice}
+function being used, which in this case is \Rfunction{xyplot}.  A look
+at the help page for \Rfunction{panel.xyplot} tells us that these
+arguments are \code{x} and \code{y}.  Thus, another equivalent way to
+create the plot above is
 <<eval=FALSE>>=
 xyplot(written ~ course | gender, data = Gcsemv,
        xlab = "Coursework score",
@@ -179,11 +201,11 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
-Here, we finally have access to the panel-specific data, but instead
-of doing anything with it (yet), we have simply called
-\Rfunction{panel.xyplot} with it.  Although the sequence of calls so
-far produce identical results, it is important to understand the
-concepts that have been introduced to appreciate the next example.
+Here, we finally have access to the panel-specific data, although we
+still have not done anything interesting with it.  Although the
+sequence of calls so far produce identical results, it is important to
+understand the concepts that have been introduced to appreciate what
+follows.
 
 \newpage
 
@@ -234,7 +256,7 @@ plot(trellis.last.object())
 
 We have used a \code{\dots} construct in all the panel functions
 defined above; it is now time to understand how it works.  The idea is
-fairly simple.  Functions normally have zero, one, or more named
+fairly intuitive.  Functions normally have zero, one, or more named
 arguments.  It can also optionally have a special \code{\dots}
 argument.  When such a function is called, they can be supplied
 further arguments not matching the named arguments.  These arguments
@@ -273,6 +295,7 @@ xyplot(written ~ course | gender, data = Gcsemv,
        })
 @
 %
+to produce the plot below.
 
 \vfill
 
@@ -286,7 +309,7 @@ plot(trellis.last.object())
 \subsection*{Simplifying the call}
 
 
-A useful observation is that this is equivalent to
+A very useful fact is that the previous call is equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv,
        grid = TRUE, type = c("p", "smooth"), col.line = "black",
@@ -298,10 +321,14 @@ xyplot(written ~ course | gender, data = Gcsemv,
 This is a consequence of how \Rfunction{xyplot} itself is designed.
 It has a \code{\dots} argument, which allows arbitrary additional
 arguments to be supplied to it.  Arguments that are not recognized by
-\Rfunction{xyplot} are passed on to the panel function.  Notice how
-the panel function in the last plot is similar to our initial panel
-function examples that did nothing special.  Following our earlier
-arguments in reverse, we now see that the above is equivalent to
+\Rfunction{xyplot} are passed on to the panel function.  
+\\
+
+
+~~~~Now notice how the panel function in the last plot is similar to our
+initial panel function examples that did nothing special.  Following
+our earlier steps in reverse, we now see that the above is
+equivalent to
 <<>>=
 xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
        type = c("p", "smooth"), col.line = "black",
@@ -317,13 +344,13 @@ xyplot(written ~ course | gender, data = Gcsemv, grid = TRUE,
 The end result is thus produced by a call that looks quite simple, and
 is quite close to the plot produced using the complicated panel
 function above (except for the rugs).  Of course, this approach only
-works for features already supported by the default panel function
-(e.g., rugs are not supported by \Rfunction{panel.xyplot}, and thus
-require an explicit panel function), and requires knowledge of what
-features are available.  Still, most of the default panel functions
-(named as ``\code{panel.}'' followed by the high-level function name)
-do have optional arguments that implement the most common variants,
-making this a quite useful approach.
+works for features already supported by the default panel function,
+and requires knowledge of what features are available.  For example,
+rugs are not supported by \Rfunction{panel.xyplot}, and thus require
+an explicit panel function.  Still, most of the default panel
+functions (named as ``\code{panel.}'' followed by the high-level
+function name) \emph{do} have optional arguments that implement the
+most common variants, making this a quite useful approach.
 
 
 \newpage
@@ -333,7 +360,7 @@ making this a quite useful approach.
 
 
 Returning to our original question of how to add model fits, let us
-next consider the \code{Oxboys} dataset.  We can of course add a loess
+now consider the \code{Oxboys} dataset.  We can of course add a loess
 smooth to each panel as before, but we wish to stick to parametric
 models for the remainder of this discussion.  The help page for
 \Rfunction{panel.xyplot} tells us that \code{type="r"} will add a
@@ -355,7 +382,7 @@ plot(trellis.last.object())
 
 \newpage
 
-This does not seem completely appropriate though, as we expect growth
+This does not seem entirely appropriate though, as we expect growth
 curves to be nonlinear.  Without thinking too much about \emph{what}
 kind of nonlinearity would be appropriate, let us start out with a
 simple quadratic model.  We can no longer get away without a panel
