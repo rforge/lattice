@@ -452,20 +452,18 @@ related numerical quantities; for example, using
 summary(fm.mixed)
 @
 %
-However, our goal is simply to visually incorporate the fitted model
-in the plot, and all we need for that is the \Rfunction{fitted} and
-\Rfunction{predict} (which are closely related) methods for the
-particular modeling method used.  The \Rfunction{fitted} function
-returns the fitted values for the \emph{same} data that have been used
-to fit the model.  The \Rfunction{predict} function can be used to
-obtain the predicted values for a \emph{new} set of inputs.  If no new
-data is provided, \Rfunction{predict} essentially behaves like
+However, our goal here is simply to visually incorporate the fitted
+model in the plot, and all we need for that are the (closely related)
+\Rfunction{fitted} and \Rfunction{predict} methods for the particular
+modeling function used.  The \Rfunction{fitted} function returns the
+fitted values for the \emph{same} data that have been used to fit the
+model.  The \Rfunction{predict} function can be used to obtain the
+predicted values for a \emph{new} set of inputs.  If no new data is
+provided, \Rfunction{predict} essentially behaves like
 \Rfunction{fitted}.
 
 \newpage
 
-
-\subsection*{Fitted models in panel functions}
 
 We now have the fitted model object \code{fm.mixed}, and we wish to
 plot the fitted regression curve in each panel.  Two approaches are
@@ -473,13 +471,14 @@ possible.  We can make the fitted model available to the panel
 function, and then use it as needed.  Alternatively, we can augment
 our dataset with the necessary information \emph{before} plotting
 anything.  We start with the first approach.
-\\
 
-~~~~We already know how to make the fitted model available to the
+
+\subsection*{Fitted models in panel functions}
+
+We already know how to make the fitted model available to the
 panel function: pass it in as an argument not recognized by
 \Rfunction{xyplot}, and it will be passed on to the panel function.
 Thus, we have
-
 <<>>=
 xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
        strip = FALSE, aspect = "xy", pch = 16, grid = TRUE,
@@ -494,13 +493,13 @@ xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
 @
 %
 However, this seems unnecessarily complicated.  Partly this is due to
-the use of the \Rfunction{lmer} function: as its fitted models do not
-have a \Rfunction{predict} method (for legitimate reasons), we had to
-manually construct the predictions using the result of
+the use of the \Rfunction{lmer} function; the fitted model does not
+have a \Rfunction{predict} method (for legitimate reasons), and so we
+had to manually construct the predictions using the result of
 \Rfunction{coef}.  In general, for multipanel plots the current panel
 will represent some subset of the full dataset, and we would need to
-somehow figure out the relevant part of the model.  Here, for example,
-we needed to figure out (inside the panel function) which
+somehow figure out the corresponding part of the model.  Here, for
+example, we needed to figure out (inside the panel function) which
 \code{Subject} was represented in the panel.
 
 \vfill
@@ -512,7 +511,7 @@ plot(trellis.last.object())
 
 \newpage
 
-One simpler but fairly general approach works well in this and many
+A simpler but fairly general approach works well in this and many
 other situations.  Consider the following example, which produces
 identical output.
 <<>>=
@@ -529,7 +528,7 @@ xyplot(height ~ age | Subject, data = Oxboys, fit = fm.mixed,
 This makes use of two features.  First, the \Rfunction{fitted} method
 extracts the fitted values from the model object.  This of course
 corresponds to the full dataset, and is not specific to the panel; it
-will be a vector with the same length as the number of observation
+will be a vector with the same length as the number of observations
 used to fit the model, and will be identical for each panel.  The
 second piece is the \code{subscripts} argument, which
 \Rpackage{lattice} passes to the panel function, containing the
@@ -709,8 +708,62 @@ the \code{distribute.type} argument is useful when adding model fits.
 
 
 
+\section*{Models with multiple continuous predictors}
 
-\subsection*{Session information}
+<<>>=
+
+env <- environmental
+env$ozone <- env$ozone^(1/3)
+env$Radiation <- equal.count(env$radiation, 4)
+cloud(ozone ~ wind + temperature | Radiation, env)
+splom(env[1:4])
+
+fm1.env <- lm(ozone ~ radiation * temperature * wind, env)
+fm3.env <- 
+    loess(ozone ~ wind * temperature * radiation, env,
+          ## parametric = c("radiation", "wind"), 
+          span = 0.75, degree = 2)
+
+w.mesh <- with(env, do.breaks(range(wind), 50))
+t.mesh <- with(env, do.breaks(range(temperature), 50))
+r.mesh <- with(env, do.breaks(range(radiation), 3))
+grid <- 
+    expand.grid(wind = w.mesh, 
+                temperature = t.mesh,
+                radiation = r.mesh)
+grid[["fit.linear"]] <- predict(fm1.env, newdata = grid)
+grid[["fit.loess"]] <- as.vector(predict(fm3.env, newdata = grid))
+
+
+wireframe(fit.linear + fit.loess  ~ wind * temperature | radiation, 
+          grid, outer = TRUE, shade = TRUE, zlab = "")
+
+levelplot(fit.linear ~ wind * temperature | radiation, data = grid)
+
+levelplot(fit.loess ~ wind * temperature | radiation, data = grid)
+
+library(latticeExtra)
+
+## This is wrong, as radiation values don't match.  We want a 
+## dataset with exactly two continuous and one categorical predictors. 
+
+levelplot(fit.loess ~ wind * temperature | radiation, data = grid) + 
+    xyplot(temperature ~ wind | Radiation, data = env)
+
+## also wrong because colorkey does not match
+
+levelplot(fit.linear ~ wind * temperature | radiation, data = grid) + 
+    levelplot(ozone ~ wind * temperature | Radiation, data = env, 
+              panel = panel.levelplot.points)
+
+
+
+@ 
+
+
+
+
+\section*{Session information}
 
 <<echo=FALSE,results=tex>>=
 toLatex(sessionInfo())
