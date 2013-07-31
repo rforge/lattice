@@ -48,7 +48,16 @@ include('./navigation.php');
   <h3>Vignettes</h3>
 
   <ul>
-    <li><a href="Vignettes/src/lattice-intro/lattice-intro.pdf" >An Introduction to Lattice</a>.  Also see <a href="http://dsarkar.fhcrc.org/lattice/book/chapter2.pdf" >A Technical Overview of Lattice</a> (from the <a href="http://lmdvr.r-forge.r-project.org" >Lattice book</a>).</li>
+
+    <li><a href="Vignettes/src/lattice-intro/lattice-intro.pdf" >An
+    Introduction to Lattice</a>.  Also see <a
+    href="http://dsarkar.fhcrc.org/lattice/book/chapter2.pdf" >A
+    Technical Overview of Lattice</a> (from the <a
+    href="http://lmdvr.r-forge.r-project.org" >Lattice book</a>).</li>
+
+    <li><a href="Vignettes/src/lattice-tricks/regression-lines.pdf"
+    >Displaying Model Fits in Lattice Plots</a>.  </li>
+    
   </ul>
 
   <h3>Documentation for package developers</h3>
