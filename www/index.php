@@ -52,9 +52,9 @@ include('./navigation.php');
   <p>The latest released version of lattice, which may be more recent
   than the version that came with R, is available from <a
   href="http://cran.r-project.org/web/packages/lattice/" >CRAN</a>.
-  The latest development snapshot is available from <a
-  href="https://r-forge.r-project.org/R/?group_id=638"
-  >R-forge</a></p>
+  The latest development snapshot is available at <a
+  href="https://github.com/deepayan/lattice"
+  >GitHub</a></p>
 
   <h2>LatticeExtra</h2>
 
