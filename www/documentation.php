@@ -28,9 +28,11 @@ include('./navigation.php');
   </div>
 
   <p>for an introductory page with further links.  The complete online
-  documentation is also available in the form of a single <a
-  href="http://cran.r-project.org/web/packages/lattice/lattice.pdf"
-  >PDF</a> file at CRAN.  </p>
+  documentation is also available in the form of a
+  single <a href="http://cran.r-project.org/web/packages/lattice/lattice.pdf"
+  >PDF</a> file at CRAN. Although this is intended primarily as a
+  reference, a conscious attempt has been made to order the entries as
+  naturally as possible. </p>
 
   <p>Note that the online documentation is by nature somewhat terse,
   especially because of its constrained format.  Gentler introductions
@@ -42,8 +44,13 @@ include('./navigation.php');
     <li><em><a href="http://lmdvr.r-forge.r-project.org/" >Lattice</a></em> by Deepayan Sarkar</li>
   </ul>
 
-  <h2>Additional documentation</h2>
+  <p>There is also an upcoming
+  online <a href="https://www.datacamp.com">DataCamp</a> course
+  on <a href="https://www.datacamp.com/courses/data-visualization-in-r-with-lattice">Data
+  Visualization with lattice</a>. </p>
 
+  
+  <h2>Additional documentation</h2>
   
   <h3>Vignettes</h3>
 
